@@ -1,0 +1,13 @@
+{
+	"order": 4,
+	"registration": "none",
+	"reads": "text",
+	"ships": [
+		"hooks",
+		"skills",
+		"extension"
+	],
+	"serves": [
+		"pi"
+	]
+}

@@ -1,0 +1,18 @@
+{
+	"order": 1,
+	"name": "Claude",
+	"root": "${CLAUDE_PLUGIN_ROOT}",
+	"registration": "hooks/hooks.json",
+	"manifest": ".claude-plugin/plugin.json",
+	"reads": "envelope",
+	"ships": [
+		"hooks",
+		"skills"
+	],
+	"serves": [
+		"claude-code-local",
+		"zcode",
+		"claude-chat",
+		"claude-cowork"
+	]
+}
