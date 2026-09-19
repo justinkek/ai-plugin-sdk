@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# A note the stop hook wrote, carried into the next prompt and taken away.
+payload="$(cat)"
+
+command -v jq >/dev/null 2>&1 || exit 0
+
+. "$(dirname "$0")/lib/notes.sh"
+. "$(dirname "$0")/lib/say.sh"
+
+session_id="$(hook_field "$payload" session_id)"
+[ -n "$session_id" ] || exit 0
+
+notes="$(stop_note_take "$session_id")"
+[ -n "$notes" ] || exit 0
+
+printf '%s\n' "$notes" | hook_say "$(hook_event_of "$payload")"
+exit 0

@@ -1,0 +1,67 @@
+{
+	"name": "example-plugin",
+	"version": "0.1.0",
+	"description": "What a plugin built with the SDK looks like.",
+	"displayName": "example-plugin",
+	"license": "MIT",
+	"repository": "justinkek/ai-plugin-sdk",
+	"author": {
+		"name": "Justin Kek",
+		"email": "justinkekjq@gmail.com"
+	},
+	"clients": [
+		"claude-code-local",
+		"zcode",
+		"claude-chat",
+		"claude-cowork",
+		"claude-code-cloud",
+		"codex",
+		"pi"
+	],
+	"ships": [
+		"rules"
+	],
+	"hooks": {
+		"SessionStart": [
+			"say-the-rule.sh"
+		],
+		"UserPromptSubmit": [
+			"replay-notes.sh"
+		],
+		"Stop": [
+			"note-a-long-reply.sh"
+		]
+	},
+	"settings": {
+		"LINE_CEILING": {
+			"kind": "count",
+			"default": "8",
+			"says": "the most lines a reply may hold"
+		},
+		"GREETING": {
+			"kind": "switch",
+			"default": "on",
+			"says": "`off` prints the rule without the opening line"
+		},
+		"TONE": {
+			"kind": "choice",
+			"values": [
+				"plain",
+				"formal"
+			],
+			"default": "plain",
+			"says": "how the rule is worded"
+		},
+		"GREETING_NAME": {
+			"kind": "text",
+			"unset": "unset, nobody is named",
+			"says": "the name the opening line greets",
+			"idle": {
+				"key": "GREETING",
+				"value": "off",
+				"because": "prints no opening line",
+				"so": "greets nobody"
+			}
+		}
+	}
+}
