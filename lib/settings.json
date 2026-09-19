@@ -1,0 +1,7 @@
+{
+	"STOP_NOTE_DIRECTORY": {
+		"kind": "text",
+		"default": "{state}/notes",
+		"says": "where a turn's notes are written"
+	}
+}
