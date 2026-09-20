@@ -5,7 +5,7 @@
 settings_file_value() {
   local key="$1" value
   [ -f "$PLUGIN_SETTINGS" ] || return 1
-  value="$(sed -n "s/^[[:space:]]*$key[[:space:]]*=[[:space:]]*//p" "$PLUGIN_SETTINGS" \
+  value="$(sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$PLUGIN_SETTINGS" \
     | sed 's/[[:space:]]*$//' | tail -n 1)"
   [ -n "$value" ] || return 1
   printf '%s' "$value"

@@ -7,6 +7,9 @@
 registrations="$1"
 settings="$2"
 checkout="$3"
+# The build fills this in before the file ships, so the braces are a
+# placeholder rather than an expansion.
+# shellcheck disable=SC1083
 stated={{root}}
 
 if ! command -v jq >/dev/null 2>&1; then

@@ -6,6 +6,9 @@
 # The libraries sit at <plugin>/hooks/lib, so the plugin's own directory is two
 # above them wherever the install put it. One fork, not three: a hook may be run
 # by a relative path, so the directory is resolved once.
+# Every other file in lib/ reads these. One function to a file means no file
+# can see its own variables being used, so they read as unused here.
+# shellcheck disable=SC2034
 PLUGIN_LIB="$(cd "${BASH_SOURCE[0]%/*}/.." && pwd)"
 PLUGIN_ROOT="${PLUGIN_LIB%/*/*}"
 

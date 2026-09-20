@@ -81,6 +81,8 @@ done < <(declared)
 printf "\nTest group: and names no key nothing reads\n"
 
 while read -r named; do
+  # Unquoted on purpose: one key to a line for grep.
+  # shellcheck disable=SC2046
   printf '%s\n' $(declared) "STOP_NOTE_DIRECTORY" "HOME" | grep --quiet --line-regexp "${named#${PREFIX}_}"
   assert "$named is a setting something reads" "$?" \
     "the skill offers it and no hook would ever read it"
