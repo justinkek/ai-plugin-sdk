@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Everything set here is read by the test files that source it, so nothing in
+# this file can be seen being used from inside it.
+# shellcheck disable=SC2034
+
 # What every test needs: the SDK, a plugin to build, and that plugin built.
 # A test takes the plugin directory as its first argument, so the same tests
 # run against any plugin; with none, they run against the example.

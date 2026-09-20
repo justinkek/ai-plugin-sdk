@@ -14,6 +14,10 @@ They build `example/` and check what came out. To check a real plugin instead:
 
     tests/run-tests ../that-plugin
 
+One of them runs shellcheck, and skips with a note when it is not installed. A
+`# shellcheck disable=` with no reason on the line above it fails that test:
+silencing a warning is a decision, so it is written down.
+
 ## Where a change belongs
 
 | Change | File |
@@ -25,6 +29,7 @@ They build `example/` and check what came out. To check a real plugin instead:
 | the steps for one client | `clients/<client>/<page>.md` |
 | what one of the four skills says | `skills/<name>/body.md` |
 | a setting every plugin gets | `lib/settings.json` |
+| what a plugin's hooks may not be called | `tests/test-nothing-clobbers-a-library-name.sh` |
 | the shell a hook needs | `lib/shell.sh` |
 | the paths every setting reads | `lib/settings/paths.sh`, the one file there that is not a function |
 | which parts get copied where | `build` |

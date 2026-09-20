@@ -9,6 +9,9 @@ plugin_setting_holds() {
     count) case "$value" in '' | *[!0-9]*) return 1 ;; esac ;;
     switch) case "$value" in on | off) ;; *) return 1 ;; esac ;;
     choice)
+      # Unquoted on purpose: the values arrive space separated and this puts
+      # each on a line of its own for grep.
+      # shellcheck disable=SC2046
       printf '%s\n' $(plugin_setting_values "$key") | grep --quiet --line-regexp --fixed-strings "$value" \
         || return 1
       ;;
