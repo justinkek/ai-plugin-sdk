@@ -1,0 +1,14 @@
+{
+	"order": 3,
+	"root": "${PLUGIN_ROOT}",
+	"registration": "hooks/hooks.json",
+	"manifest": ".codex-plugin/plugin.json",
+	"reads": "envelope",
+	"ships": [
+		"hooks",
+		"skills"
+	],
+	"serves": [
+		"codex"
+	]
+}

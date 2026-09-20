@@ -1,0 +1,20 @@
+{
+	"order": 2,
+	"root": "/opt/{{name}}/distributions/claude-code-cloud",
+	"registration": "settings.json",
+	"reads": "envelope",
+	"own": {
+		"SessionStart": [
+			"refresh.sh"
+		]
+	},
+	"ships": [
+		"hooks",
+		"skills",
+		"commands",
+		"cloud"
+	],
+	"serves": [
+		"claude-code-cloud"
+	]
+}
