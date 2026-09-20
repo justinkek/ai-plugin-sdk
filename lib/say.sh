@@ -3,8 +3,8 @@
 # Clients differ in what they read from a hook. Every one of them reads this
 # shape, and some read nothing else, so a hook that speaks says it this way.
 
-. "$(dirname "${BASH_SOURCE[0]}")/payload.sh"
-. "$(dirname "${BASH_SOURCE[0]}")/settings.sh"
+. "${BASH_SOURCE[0]%/*}/payload.sh"
+. "${BASH_SOURCE[0]%/*}/settings.sh"
 
 # The event a hook was called for, out of the payload it was handed.
 hook_event_of() { hook_field "$1" hook_event_name; }

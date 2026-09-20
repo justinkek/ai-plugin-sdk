@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
+. "${BASH_SOURCE[0]%/*}/shell.sh"
+
 # What a hook reads when it asks for a setting. Nothing here knows a plugin's
 # name, its prefix or any of its keys: the build writes plugin-manifest.sh
 # beside this file from the plugin's manifest, and this reads that.
 
 # The libraries sit at <plugin>/hooks/lib, so the plugin's own directory is two
 # above them wherever the install put it.
-PLUGIN_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="$(cd "$PLUGIN_LIB/../.." && pwd)"
+# One fork, not three: a hook may be run by a relative path, so the directory is
+# resolved once, and the plugin's own is two components above it.
+PLUGIN_LIB="$(cd "${BASH_SOURCE[0]%/*}" && pwd)"
+PLUGIN_ROOT="${PLUGIN_LIB%/*/*}"
 . "$PLUGIN_LIB/plugin-manifest.sh"
 
 plugin_named_home="${PLUGIN_PREFIX}_HOME"
@@ -98,6 +102,11 @@ installed_version() {
 # hooks/migrations.sh. It runs once per version, before anything reads state.
 apply_migrations() {
   local applied="" installed marker="$PLUGIN_STATE/applied-version"
+
+  # The common case is a marker written after the manifest it was read from.
+  # Nothing has changed, so nothing is read.
+  [ -f "$marker" ] && [ "$marker" -nt "$PLUGIN_ROOT/plugin.json" ] && return 0
+
   [ -f "$marker" ] && read -r applied < "$marker"
   installed="$(installed_version)" || return 0
   [ "$applied" = "$installed" ] && return 0

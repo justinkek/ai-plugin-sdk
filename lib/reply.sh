@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. "$(dirname "${BASH_SOURCE[0]}")/payload.sh"
+. "${BASH_SOURCE[0]%/*}/payload.sh"
 
 # The reply a turn ended with. Some clients hand it over in the payload, and
 # the rest name a transcript to read it out of.

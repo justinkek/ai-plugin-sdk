@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. "${BASH_SOURCE[0]%/*}/shell.sh"
+
 # Clients spell the payload's keys differently: session_id here, sessionId
 # there. A hook asks for the name it knows and gets whichever one was sent.
 hook_field() {
