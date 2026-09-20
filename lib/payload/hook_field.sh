@@ -3,22 +3,29 @@
 # Clients spell the payload's keys differently: session_id here, sessionId
 # there. A hook asks for the name it knows and gets whichever one was sent.
 hook_field() {
-  local payload="$1" key="$2" camel said
+  local payload="$1" key="$2" camel said value
 
   camel="$(printf '%s' "$key" | awk -F_ '{
     printf "%s", $1
     for (i = 2; i <= NF; i++) printf "%s%s", toupper(substr($i, 1, 1)), substr($i, 2)
   }')"
 
-  for said in "$key" "$camel"; do
-    printf '%s' "$payload" \
-      | sed -n "s/.*\"$said\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1 \
-      | grep . && return 0
+  # jq reads it as JSON, which is what it is. Where the payload parses, its
+  # answer is the answer: a key it does not hold is a key that was not sent,
+  # whatever a nested object further down happens to be called.
+  if command -v jq >/dev/null 2>&1 && printf '%s' "$payload" | jq --exit-status . >/dev/null 2>&1; then
+    for said in "$key" "$camel"; do
+      value="$(printf '%s' "$payload" \
+        | jq --raw-output --arg k "$said" 'if has($k) and .[$k] != null then .[$k] | tostring else empty end' 2>/dev/null)"
+      if [ -n "$value" ]; then printf '%s' "$value"; return 0; fi
+    done
+    return 1
+  fi
 
-    # true, false and numbers carry no quotes.
-    printf '%s' "$payload" \
-      | sed -n "s/.*\"$said\"[[:space:]]*:[[:space:]]*\([A-Za-z0-9.-]*\).*/\1/p" | head -1 \
-      | grep . && return 0
+  # No jq on this machine, or a payload that is not JSON at all.
+  for said in "$key" "$camel"; do
+    value="$(payload_scanned "$payload" "$said")" || continue
+    if [ -n "$value" ]; then printf '%s' "$value"; return 0; fi
   done
 
   return 1
