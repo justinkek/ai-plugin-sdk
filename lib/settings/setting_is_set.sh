@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# A setting with no default is unset until someone sets it, and a hook that
+# reads one asks whether it was set before it reads it.
+setting_is_set() { [ -n "$(setting_value "$1")" ]; }

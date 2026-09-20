@@ -6,7 +6,7 @@ folder="$(cd "$(dirname "$0")" && pwd)"
 checkout="$(cd "$folder/../.." && pwd)"
 [ -d "$checkout/.git" ] || exit 0
 
-. "$folder/hooks/lib/settings.sh"
+. "$folder/hooks/lib/state.sh"
 
 before="$(installed_version)"
 

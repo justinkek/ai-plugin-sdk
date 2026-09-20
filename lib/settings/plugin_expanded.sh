@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# A default is written in the manifest before there is a home to point at, so
+# it names the two directories and they are filled in here.
+plugin_expanded() {
+  local value="$1"
+  value="${value//\{state\}/$PLUGIN_STATE}"
+  value="${value//\{home\}/$PLUGIN_HOME}"
+  printf '%s' "$value"
+}

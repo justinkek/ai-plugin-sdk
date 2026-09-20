@@ -45,7 +45,7 @@ printf "\nTest group: the version a hook reads is the version on disk\n"
 
 for distribution in $(distributions); do
   [ -d "$BUILT/$distribution/hooks/lib" ] || continue
-  read_back="$(bash -c ". \"$BUILT/$distribution/hooks/lib/settings.sh\" && installed_version")"
+  read_back="$(bash -c ". \"$BUILT/$distribution/hooks/lib/state.sh\" && installed_version")"
   [ "$read_back" = "$VERSION" ]
   assert "$distribution reads $VERSION off disk" "$?" \
     "it read '$read_back', so an update would be announced against the wrong version"

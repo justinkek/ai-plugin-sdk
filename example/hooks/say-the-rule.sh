@@ -5,6 +5,7 @@
 payload="$(cat)"
 
 . "$(dirname "$0")/lib/say.sh"
+. "$(dirname "$0")/lib/state.sh"
 
 apply_migrations
 
