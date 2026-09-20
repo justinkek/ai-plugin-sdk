@@ -1,0 +1,48 @@
+name: tests
+
+# Sixteen tests nothing runs are sixteen tests nobody has run. Eleven changes
+# went into this repository before this file existed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The suite carries neither of these on purpose: someone running
+      # tests/run-tests on their own machine should not have to install
+      # anything to see most of it pass. Here they are installed, so the
+      # shellcheck test stops skipping and both payload readers are exercised.
+      - name: Install shellcheck and jq
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck jq
+
+      - name: Tests, against the example plugin
+        run: tests/run-tests
+
+  # The Pi harness ships a TypeScript extension that nothing else compiles, so
+  # a syntax error in it would reach a person before it reached a test.
+  pi-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install --yes jq
+
+      - name: Build the example plugin
+        run: ./build example
+
+      - name: Type-check what the build wrote
+        run: |
+          npm install --no-audit --no-fund typescript@5 @types/node@22
+          ./node_modules/.bin/tsc --noEmit \
+            --target es2022 --module esnext --moduleResolution bundler \
+            --types node --typeRoots ./node_modules/@types \
+            example/distributions/pi/src/index.ts

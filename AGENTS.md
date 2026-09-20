@@ -14,6 +14,10 @@ They build `example/` and check what came out. To check a real plugin instead:
 
     tests/run-tests ../that-plugin
 
+Every push and every pull request runs them, on a machine with shellcheck and
+jq installed, and type-checks the Pi extension the build writes — nothing else
+compiles it. See `.github/workflows/tests.yml`.
+
 One of them runs shellcheck, and skips with a note when it is not installed. A
 `# shellcheck disable=` with no reason on the line above it fails that test:
 silencing a warning is a decision, so it is written down.
