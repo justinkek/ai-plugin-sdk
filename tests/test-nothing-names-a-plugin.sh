@@ -8,7 +8,7 @@ printf "Test group: nothing the SDK ships names a plugin\n"
 
 named="$(grep --recursive --line-number --ignore-case \
   --extended-regexp 'unsolicited.text|example.plugin' \
-  "$SDK/build" "$SDK/lib" "$SDK/clients" "$SDK/skills" "$SDK/commands" "$SDK/harnesses" 2>/dev/null || true)"
+  "$SDK/build" "$SDK/builder" "$SDK/lib" "$SDK/clients" "$SDK/skills" "$SDK/commands" "$SDK/harnesses" 2>/dev/null || true)"
 
 [ -z "$named" ]
 printf '%s' "$named" | sed 's/^/        /'
