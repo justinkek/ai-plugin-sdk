@@ -26,8 +26,10 @@ printf "\nTest group: nothing is silenced without saying why\n"
 
 # A disable with no reason above it is a warning someone waved through.
 unexplained=""
+found=0
 while read -r hit; do
   [ -n "$hit" ] || continue
+  found=$((found + 1))
   file="${hit%%:*}"
   line="${hit#*:}"
   line="${line%%:*}"
@@ -37,10 +39,17 @@ while read -r hit; do
     '#'*) ;;
     *) unexplained="$unexplained $file:$line" ;;
   esac
-done < <(cd "$SDK" && grep -rn 'shellcheck disable' $files || true)
+# Anchored, so this line — which names the phrase rather than being one — is
+# not a directive the check finds in itself.
+done < <(cd "$SDK" && grep -rnE '^[[:space:]]*#+[[:space:]]*shellcheck[[:space:]]+disable' $files || true)
 
 [ -z "$unexplained" ]
 assert "every disable carries a reason on the line above" "$?" \
   "$unexplained is silenced and nothing says why"
+
+# A pattern that matches nothing would pass this group without reading anything.
+[ "$found" -gt 0 ]
+assert "and there were disables to check" "$?" \
+  "the pattern found none at all, so the group proved nothing"
 
 counted
