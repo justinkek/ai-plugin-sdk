@@ -24,6 +24,7 @@ They build `example/` and check what came out. To check a real plugin instead:
 | the steps for one client | `clients/<client>/<page>.md` |
 | what one of the four skills says | `skills/<name>/body.md` |
 | a setting every plugin gets | `lib/settings.json` |
+| the shell a hook needs | `lib/shell.sh` |
 | which parts get copied where | `build` |
 
 ## How the build reads a plugin
@@ -75,6 +76,7 @@ Each of these was a real failure on a real client, and something here holds it:
 | a harness may read the text rather than the envelope | `reads` in `harness.json`, and `<PREFIX>_PLAIN` |
 | a cloud install must merge rather than append | `harnesses/claude-code-cloud/merge-settings.sh` |
 | two plugins must not drain each other's notes | `lib/notes.sh`, under the plugin's own home |
+| a shell too old fails with a sentence, not a syntax error | `lib/shell.sh`, sourced by both roots of the graph |
 
 ## Writing
 
