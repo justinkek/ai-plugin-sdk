@@ -70,15 +70,20 @@ default. `{state}` and `{home}` in a default are filled in at run time.
 
 ## What a hook can read
 
-Every hook script gets `hooks/lib/` beside it:
+Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 
-| File | What it gives |
+| Source this | What it gives |
 | --- | --- |
-| `payload.sh` | `hook_field`, which reads a key in either spelling, whichever harness sent it |
-| `say.sh` | `hook_say`, the one answer shape every client reads |
-| `reply.sh` | `hook_last_reply`, out of the payload or out of a transcript |
-| `notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
-| `settings.sh` | `setting_value`, `setting_on`, `installed_version`, `plugin_mark` |
+| `lib/payload.sh` | `hook_field`, which reads a key in either spelling, whichever harness sent it |
+| `lib/say.sh` | `hook_say` and `hook_say_aloud`, the one answer shape every client reads |
+| `lib/reply.sh` | `hook_last_reply`, out of the payload or out of a transcript |
+| `lib/notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
+| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set` |
+| `lib/state.sh` | `installed_version`, `apply_migrations`, `plugin_mark` |
+
+Each of those is a directory beside it with one function to a file, so
+`setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it
+needs, so sourcing `notes.sh` gets you `settings.sh` and `state.sh` as well.
 
 ## Which clients it knows
 

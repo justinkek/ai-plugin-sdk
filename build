@@ -59,7 +59,8 @@ filled() {
 
 mark_scripts() {
   local folder="$1" script
-  for script in "$folder"/*.sh "$folder"/hooks/*.sh "$folder"/hooks/lib/*.sh; do
+  for script in "$folder"/*.sh "$folder"/hooks/*.sh "$folder"/hooks/lib/*.sh \
+    "$folder"/hooks/lib/*/*.sh; do
     [ -f "$script" ] || continue
     sed -i.bak "1a\\
 # $generated" "$script"
@@ -295,7 +296,10 @@ payload() {
   if ships "$harness" hooks; then
     mkdir -p "$target/hooks/lib"
     cp "$plugin"/hooks/*.sh "$target/hooks/" 2>/dev/null || true
-    cp "$sdk"/lib/*.sh "$target/hooks/lib/"
+    # lib/ is a directory per subject with one function to a file, so it is
+    # copied whole. settings.json is the build's, not a hook's.
+    cp -R "$sdk"/lib/. "$target/hooks/lib/"
+    rm -f "$target/hooks/lib/settings.json"
     plugin_manifest_sh > "$target/hooks/lib/plugin-manifest.sh"
     if [ -f "$plugin/hooks/migrations.sh" ]; then
       mv "$target/hooks/migrations.sh" "$target/hooks/lib/migrations.sh"

@@ -18,13 +18,15 @@ They build `example/` and check what came out. To check a real plugin instead:
 
 | Change | File |
 | --- | --- |
-| what a hook script can call | `lib/` |
+| what a hook script can call | `lib/<subject>/<function>.sh`, named by the file it is in |
+| what sourcing one subject pulls in | `lib/<subject>.sh`, which names its parts and defines nothing |
 | how a harness is told about a hook | `harnesses/<harness>/harness.json` |
 | what a harness carries besides the registration | a file under `harnesses/<harness>/` |
 | the steps for one client | `clients/<client>/<page>.md` |
 | what one of the four skills says | `skills/<name>/body.md` |
 | a setting every plugin gets | `lib/settings.json` |
 | the shell a hook needs | `lib/shell.sh` |
+| the paths every setting reads | `lib/settings/paths.sh`, the one file there that is not a function |
 | which parts get copied where | `build` |
 
 ## How the build reads a plugin

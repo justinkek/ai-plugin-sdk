@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# What this plugin has already done: which version it last migrated for, and
+# which sessions it has already spoken to. Settings are what a person writes;
+# state is what the plugin writes for itself.
+#
+# One function to a file, in state/. The paths come from settings/.
+
+. "${BASH_SOURCE[0]%/*}/settings.sh"
+. "${BASH_SOURCE[0]%/*}/state/installed_version.sh"
+. "${BASH_SOURCE[0]%/*}/state/apply_migrations.sh"
+. "${BASH_SOURCE[0]%/*}/state/plugin_marked.sh"
+. "${BASH_SOURCE[0]%/*}/state/plugin_mark.sh"
+. "${BASH_SOURCE[0]%/*}/state/plugin_mark_once.sh"
