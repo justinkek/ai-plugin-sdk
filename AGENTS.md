@@ -90,6 +90,7 @@ Each of these was a real failure on a real client, and something here holds it:
 | Fact | What holds it |
 | --- | --- |
 | a payload key arrives in either spelling | `lib/payload.sh` |
+| a payload is JSON, so a nested key is not the one asked for | `lib/payload/hook_field.sh`, jq where there is jq, `payload_scanned` where there is not |
 | some clients discard plain text from a hook | `lib/say.sh` |
 | a reply may come with no transcript at all | `lib/reply.sh` |
 | a hook without the executable bit is not run | every registration runs `bash "<path>"` |
