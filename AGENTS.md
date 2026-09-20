@@ -32,7 +32,20 @@ silencing a warning is a decision, so it is written down.
 | what a plugin's hooks may not be called | `tests/test-nothing-clobbers-a-library-name.sh` |
 | the shell a hook needs | `lib/shell.sh` |
 | the paths every setting reads | `lib/settings/paths.sh`, the one file there that is not a function |
-| which parts get copied where | `build` |
+| which parts get copied where | `builder/contents.sh` |
+| how a page or a README is written | `builder/pages.sh` |
+| how a skill is rendered | `builder/skills.sh` |
+| what the manifest is read into | `builder/manifest.sh` |
+
+## How the build is put together
+
+`build` is the loop: read the manifest, then one folder per harness the plugin
+names a client of. `builder/` holds the parts, one file to a subject, and the
+loop sources them.
+
+The rule inside `lib/` is one function to a file, because a plugin author goes
+looking for one function. `builder/` is one subject to a file instead, because
+whoever opens it is changing the build and wants the subject together.
 
 ## How the build reads a plugin
 
