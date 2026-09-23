@@ -20,12 +20,28 @@ ships() {
     "$sdk/harnesses/$1/harness.json" >/dev/null
 }
 
-# A harness serves the clients it knows how to install for, and a plugin is
-# built for the ones it names. Only the clients in both are written anywhere.
+# Whether a plugin has anything that would reach a session on this client. A
+# plugin with only hooks reaches nothing on a client that runs none, and a
+# client that runs neither hooks nor skills reaches nothing at all.
+reaches() {
+  local client="$1"
+  if [ "$(client_runs "$client" .runs.hooks)" = "true" ] && plugin_has_hooks; then return 0; fi
+  if [ "$(client_runs "$client" .runs.skills)" = "true" ]; then return 0; fi
+  return 1
+}
+
+# A harness serves the clients it knows how to install for. A plugin is built
+# for every one of them it can reach - naming `clients` in the manifest narrows
+# that, and most plugins never need to.
 served() {
-  jq --raw-output --slurpfile plugin "$manifest" \
-    '.serves[] | select(. as $client | $plugin[0].clients | index($client))' \
-    "$sdk/harnesses/$1/harness.json"
+  local client
+  for client in $(jq --raw-output '.serves[]' "$sdk/harnesses/$1/harness.json"); do
+    if [ "$(jq '.clients // empty | length' "$manifest")" != "" ]; then
+      jq --exit-status --arg c "$client" '.clients | index($c)' "$manifest" >/dev/null || continue
+    fi
+    reaches "$client" || continue
+    printf '%s\n' "$client"
+  done
 }
 
 # A harness with no client this plugin names is a harness this plugin has no

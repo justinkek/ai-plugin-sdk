@@ -62,4 +62,24 @@ while read -r client; do
   assert "the page carries $client's note" "$?" "it says Partial and never says why"
 done < <(jq --raw-output '.clients[]?' "$PLUGIN/plugin.json" 2>/dev/null)
 
+printf "\nTest group: a plugin gets every client it can reach, without naming any\n"
+
+named="$(jq --raw-output '.clients // empty | length' "$MANIFEST")"
+if [ -z "$named" ]; then
+  for client in $(jq --raw-output '.serves[]' "$SDK"/harnesses/*/harness.json); do
+    # A client it cannot reach is one running neither hooks nor skills.
+    runs_hooks="$(jq --raw-output 'if .runs.hooks == null then empty else .runs.hooks end' "$SDK/clients/$client/client.json")"
+    runs_skills="$(jq --raw-output 'if .runs.skills == null then empty else .runs.skills end' "$SDK/clients/$client/client.json")"
+    [ "$runs_hooks" = "true" ] || [ "$runs_skills" = "true" ] || continue
+
+    found=""
+    for distribution in $(distributions); do
+      [ -f "$BUILT/$distribution/clients/$client.md" ] && found=1
+    done
+    [ -n "$found" ]
+    assert "$client got a page without the manifest naming it" "$?" \
+      "the plugin can reach it and the build left it out"
+  done
+fi
+
 counted

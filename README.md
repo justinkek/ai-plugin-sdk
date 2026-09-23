@@ -45,7 +45,6 @@ so what is committed is what a person gets.
   "version": "0.1.0",
   "description": "What it is for.",
   "repository": "you/example-plugin",
-  "clients": ["claude-code-local", "codex", "pi"],
   "ships": ["rules"],
   "hooks": {
     "SessionStart": ["say-the-rule.sh"],
@@ -58,8 +57,9 @@ so what is committed is what a person gets.
 }
 ```
 
-`clients` is which clients to build for; a harness with none of them written in
-it is not built. `hooks` is read by every harness: each one registers those
+`clients` is optional. Leave it out and the plugin is built for every client the
+SDK knows, minus any it could not reach - a client running neither hooks nor
+skills. Name it only to narrow that. `hooks` is read by every harness: each one registers those
 scripts the way it wants to be told. `settings` is read by the settings library
 and by the settings skill, so a key you declare is a key a person is offered.
 
