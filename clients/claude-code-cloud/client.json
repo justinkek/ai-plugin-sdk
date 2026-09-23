@@ -1,3 +1,9 @@
 {
-	"name": "Claude Code, in the cloud"
+	"name": "Claude Code, in the cloud",
+	"runs": {
+		"hooks": true,
+		"skills": true,
+		"settings": "session"
+	},
+	"note": "The container is rebuilt for every session, so a setting kept goes in an environment variable."
 }

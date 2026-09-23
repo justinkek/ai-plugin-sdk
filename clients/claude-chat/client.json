@@ -1,3 +1,9 @@
 {
-	"name": "Claude Chat"
+	"name": "Claude Chat",
+	"runs": {
+		"hooks": false,
+		"skills": true,
+		"settings": "none"
+	},
+	"note": "No hook runs, so a plugin reaches a conversation only through its skills."
 }
