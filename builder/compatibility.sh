@@ -10,10 +10,14 @@
 
 # What a client runs, against what this plugin has. A client that runs none of
 # it is a client this plugin has nothing to reach a session with.
+# What a client runs is the SDK's knowledge, so it is read from the SDK's copy
+# and never from a plugin's override. A plugin may rename a client; it may not
+# claim the client runs something it does not.
+#
 # `false // empty` is empty in jq, so a client that says it runs no hooks would
 # read the same as one that says nothing. Ask whether the key is there.
 client_runs() {
-  jq --raw-output "if $2 == null then empty else $2 end" "$(client_source "$1")"
+  jq --raw-output "if $2 == null then empty else $2 end" "$sdk/clients/$1/client.json"
 }
 
 plugin_has_hooks() { [ "$(jq '[.hooks[]?[]] | length' "$manifest")" -gt 0 ]; }
