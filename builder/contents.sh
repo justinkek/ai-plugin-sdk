@@ -51,7 +51,7 @@ mark_scripts() {
 }
 
 hooks() {
-  local target="$1"
+  local target="$1" helper
   mkdir -p "$target/hooks/lib"
   cp "$plugin"/hooks/*.sh "$target/hooks/" 2>/dev/null || true
   # lib/ is a directory per subject with one function to a file, so it is copied
@@ -59,9 +59,15 @@ hooks() {
   cp -R "$sdk"/lib/. "$target/hooks/lib/"
   rm -f "$target/hooks/lib/settings.json"
   plugin_manifest_sh > "$target/hooks/lib/plugin-manifest.sh"
-  if [ -f "$plugin/hooks/migrations.sh" ]; then
-    mv "$target/hooks/migrations.sh" "$target/hooks/lib/migrations.sh"
-  fi
+
+  # A plugin's own hooks/ holds hooks, which a harness runs, and files its hooks
+  # source, which nothing runs. The second kind ends -lib.sh, and migrations.sh
+  # is one of them by another name. They go beside the SDK's libraries, so what
+  # is left in hooks/ is what the manifest registers and nothing else.
+  for helper in "$target"/hooks/*-lib.sh "$target/hooks/migrations.sh"; do
+    [ -f "$helper" ] || continue
+    mv "$helper" "$target/hooks/lib/$(basename "$helper")"
+  done
 }
 
 # Whatever else the plugin says it ships: its rules, its templates, its data.

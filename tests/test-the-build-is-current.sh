@@ -14,7 +14,10 @@ assert "and writes the same thing both times" "$?" \
 diff --unified "$WORK/INSTALL.md" "$WORK/INSTALL-again.md" > "$WORK/page-drift"
 assert "and the same install page" "$?" "the page drifts on every run"
 
-if [ -d "$PLUGIN/distributions" ]; then
+# Only when the plugin commits them. A directory left behind by someone running
+# the build by hand is not what an install copies, and failing on it is a test
+# crying wolf.
+if git -C "$PLUGIN" ls-files --error-unmatch distributions >/dev/null 2>&1; then
   printf "\nTest group: what the plugin ships is what its sources build\n"
 
   diff --recursive --unified "$PLUGIN/distributions" "$BUILT" > "$WORK/committed-drift"

@@ -63,6 +63,27 @@ for distribution in $(distributions); do
   done
 done
 
+printf "\nTest group: what a hook sources is not left among the hooks\n"
+
+# hooks/ is what a harness runs. A file the plugin's hooks source is not one of
+# those, and leaving it there makes it look registered when nothing runs it.
+for distribution in $(distributions); do
+  left="$(ls "$BUILT/$distribution"/hooks/*-lib.sh "$BUILT/$distribution"/hooks/migrations.sh 2>/dev/null || true)"
+  [ -z "$left" ]
+  assert "$distribution leaves no helper in hooks/" "$?" "$left is there and nothing runs it"
+done
+
+for helper in "$PLUGIN"/hooks/*-lib.sh "$PLUGIN/hooks/migrations.sh"; do
+  [ -f "$helper" ] || continue
+  named="$(basename "$helper")"
+  for distribution in $(distributions); do
+    [ -d "$BUILT/$distribution/hooks/lib" ] || continue
+    [ -f "$BUILT/$distribution/hooks/lib/$named" ]
+    assert "$distribution carries $named beside the libraries" "$?" \
+      "the plugin ships it and the build dropped it"
+  done
+done
+
 printf "\nTest group: what a harness spawns itself is handed every hook the manifest declares\n"
 
 for distribution in $(distributions); do
