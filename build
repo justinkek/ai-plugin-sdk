@@ -66,5 +66,13 @@ for harness in $(harnesses); do
   if builds_for "$harness"; then distribution "$harness" "$out/$harness"; fi
 done
 
+# A build that writes no folder at all has told the plugin nothing about why.
+[ -d "$out" ] || {
+  printf 'nothing was built for %s.\n\n' "$name" >&2
+  printf 'No client could be reached. Check that plugin.json declares hooks or\n' >&2
+  printf 'that the SDK has a client folder for what it names in `clients`.\n' >&2
+  exit 1
+}
+
 install_page
 compatibility_page "$plugin/COMPATIBILITY.md"

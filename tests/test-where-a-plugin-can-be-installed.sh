@@ -82,4 +82,33 @@ if [ -z "$named" ]; then
   done
 fi
 
+printf "\nTest group: what a client runs is the SDK's, not a plugin's to claim\n"
+
+# A plugin override holding only a name used to make every client look
+# unreachable, and the build wrote nothing at all while exiting 0.
+override="$WORK/override"
+cp -R "$PLUGIN" "$override"
+mkdir -p "$override/clients/codex"
+printf '{\n\t"name": "Codex"\n}\n' > "$override/clients/codex/client.json"
+
+"$SDK/build" "$override" "$WORK/override-out" "$WORK/override.md" >/dev/null 2>&1
+assert "a plugin naming a client without saying what it runs still builds" "$?" \
+  "the build read runs from the plugin and found none"
+
+[ -d "$WORK/override-out/codex" ]
+assert "and that client still gets its folder" "$?" "the override made it unreachable"
+
+printf "\nTest group: a build that writes nothing says so\n"
+
+empty="$WORK/empty-plugin"
+mkdir -p "$empty"
+printf '{"name":"none","version":"0.0.1","clients":[],"hooks":{}}\n' > "$empty/plugin.json"
+said="$("$SDK/build" "$empty" "$WORK/empty-out" "$WORK/empty.md" 2>&1)"
+outcome="$?"
+[ "$outcome" != "0" ]
+assert "it fails rather than exiting 0 with no folders" "$?" "it exited 0 having built nothing"
+
+printf '%s' "$said" | grep --quiet --fixed-strings 'nothing was built'
+assert "and says what happened" "$?" "it said '$said'"
+
 counted
