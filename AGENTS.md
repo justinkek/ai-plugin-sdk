@@ -6,6 +6,13 @@ This is the SDK a plugin runs to build its distributions. It knows harnesses and
 clients. It does not know any plugin, and a test fails when something here names
 one.
 
+## Compatibility is the SDK's
+
+Where a plugin can be installed, and what runs when it is, is true of the
+client whatever plugin is built for it. A plugin writes none of it: the build
+writes its `COMPATIBILITY.md` from `compatibility.json` and what each
+`client.json` says it runs.
+
 ## Every merge is a release
 
 An install names no ref — `npx ai-plugin-sdk`, or a clone — so whatever the
@@ -67,6 +74,8 @@ silencing a warning is a decision, so it is written down.
 | how a page or a README is written | `builder/pages.sh` |
 | how a skill is rendered | `builder/skills.sh` |
 | what the manifest is read into | `builder/manifest.sh` |
+| what a client runs, and its caveat | `clients/<client>/client.json` |
+| which products exist and which have a client | `compatibility.json` |
 
 ## How the build is put together
 

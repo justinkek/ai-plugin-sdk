@@ -22,6 +22,7 @@ page="${3:-$plugin/INSTALL.md}"
 . "$sdk/builder/pages.sh"
 . "$sdk/builder/skills.sh"
 . "$sdk/builder/contents.sh"
+. "$sdk/builder/compatibility.sh"
 
 # One folder per harness this plugin names a client of.
 distribution() {
@@ -66,3 +67,4 @@ for harness in $(harnesses); do
 done
 
 install_page
+compatibility_page "$plugin/COMPATIBILITY.md"

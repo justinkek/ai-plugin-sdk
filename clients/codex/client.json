@@ -1,3 +1,9 @@
 {
-	"name": "Codex"
+	"name": "Codex",
+	"runs": {
+		"hooks": true,
+		"skills": true,
+		"settings": "install"
+	},
+	"note": "No hook runs until a person has trusted it, and an update un-trusts them all."
 }

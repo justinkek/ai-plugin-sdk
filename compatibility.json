@@ -1,0 +1,50 @@
+{
+	"says": "Where a plugin built with this SDK can be installed, and what runs when it is. A row naming a client is one the SDK has a folder for; a row naming none is a product nothing installs on yet.",
+	"vendors": [
+		{
+			"vendor": "Anthropic",
+			"products": [
+				{ "product": "Claude Chat", "surface": "Web GUI", "where": "Hosted", "client": "claude-chat" },
+				{ "product": "Claude Chat", "surface": "Desktop GUI", "where": "Hosted", "client": "claude-chat" },
+				{ "product": "Claude Chat", "surface": "Mobile GUI", "where": "Hosted", "client": "claude-chat" },
+				{ "product": "Cowork", "surface": "Web GUI", "where": "Hosted", "client": "claude-cowork" },
+				{ "product": "Cowork", "surface": "Desktop GUI", "where": "Hosted", "client": "claude-cowork" },
+				{ "product": "Cowork", "surface": "Mobile GUI", "where": "Hosted", "client": "claude-cowork" },
+				{ "product": "Claude Code", "surface": "Web GUI", "where": "Hosted", "client": "claude-code-cloud" },
+				{ "product": "Claude Code", "surface": "Desktop GUI", "where": "Hosted", "client": "claude-code-cloud" },
+				{ "product": "Claude Code", "surface": "Mobile GUI", "where": "Hosted", "client": "claude-code-cloud" },
+				{ "product": "Claude Code", "surface": "Desktop GUI", "where": "Local", "client": "claude-code-local" },
+				{ "product": "Claude Code", "surface": "CLI", "where": "Local", "client": "claude-code-local" }
+			]
+		},
+		{
+			"vendor": "OpenAI",
+			"products": [
+				{ "product": "ChatGPT Chat", "surface": "Web GUI", "where": "Hosted", "client": null, "says": "Not verified" },
+				{ "product": "ChatGPT Chat", "surface": "Desktop GUI", "where": "Hosted", "client": null, "says": "Not verified" },
+				{ "product": "ChatGPT Chat", "surface": "Mobile GUI", "where": "Hosted", "client": null, "says": "Not verified" },
+				{ "product": "ChatGPT Work", "surface": "Web GUI", "where": "Hosted", "client": null, "says": "Not supported" },
+				{ "product": "ChatGPT Work", "surface": "Desktop GUI", "where": "Local", "client": null, "says": "Not verified" },
+				{ "product": "ChatGPT Work", "surface": "Desktop GUI", "where": "Hosted", "client": null, "says": "Not supported" },
+				{ "product": "ChatGPT Work", "surface": "Mobile GUI", "where": "Hosted", "client": null, "says": "Not supported" },
+				{ "product": "Codex", "surface": "Web GUI", "where": "Hosted", "client": null, "says": "Not supported" },
+				{ "product": "Codex", "surface": "Desktop GUI", "where": "Local", "client": "codex" },
+				{ "product": "Codex", "surface": "Desktop GUI", "where": "Hosted", "client": null, "says": "Not supported" },
+				{ "product": "Codex", "surface": "CLI", "where": "Local", "client": "codex" },
+				{ "product": "Codex", "surface": "IDE extension", "where": "Local", "client": null, "says": "Not supported" }
+			]
+		},
+		{
+			"vendor": "ZCode",
+			"products": [
+				{ "product": "ZCode", "surface": "Desktop GUI", "where": "Local", "client": "zcode" }
+			]
+		},
+		{
+			"vendor": "Pi",
+			"products": [
+				{ "product": "Pi", "surface": "CLI", "where": "Local", "client": "pi" }
+			]
+		}
+	]
+}

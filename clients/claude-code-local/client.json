@@ -1,3 +1,8 @@
 {
-	"name": "Claude Code, on your machine"
+	"name": "Claude Code, on your machine",
+	"runs": {
+		"hooks": true,
+		"skills": true,
+		"settings": "install"
+	}
 }

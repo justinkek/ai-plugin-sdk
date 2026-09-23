@@ -1,3 +1,9 @@
 {
-	"name": "Pi"
+	"name": "Pi",
+	"runs": {
+		"hooks": true,
+		"skills": false,
+		"settings": "install"
+	},
+	"note": "Skills load from ~/.agents/skills and an extension puts none there, so a plugin's skills do not arrive."
 }

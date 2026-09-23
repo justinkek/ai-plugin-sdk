@@ -1,3 +1,9 @@
 {
-	"name": "Claude Cowork"
+	"name": "Claude Cowork",
+	"runs": {
+		"hooks": true,
+		"skills": true,
+		"settings": "session"
+	},
+	"note": "Every conversation runs on Anthropic's servers, whichever app starts it."
 }
