@@ -23,6 +23,13 @@ jobs:
       - name: Tests, against the example plugin
         run: tests/run-tests
 
+      # Every merge here is a release, so every merge carries a version.
+      - name: The version moved
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --depth=1 origin "$GITHUB_BASE_REF"
+          tests/version-changed "origin/$GITHUB_BASE_REF"
+
   # The Pi harness ships a TypeScript extension that nothing else compiles, so
   # a syntax error in it would reach a person before it reached a test.
   pi-extension:

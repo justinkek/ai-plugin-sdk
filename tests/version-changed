@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Every merge to main is a release: an install names no ref, so whatever the
+# default branch points at is what a person gets. A merge that does not move
+# the version leaves every skill, and every session asked which version it is
+# running, naming something that is no longer what is running.
+#
+#   tests/version-changed <base-ref>
+#
+# Run by CI on a pull request. It is not in tests/run-tests, because a branch
+# is allowed to be mid-change; it is the merge that has to carry the bump.
+
+set -e
+
+sdk="$(cd "$(dirname "$0")/.." && pwd)"
+base="${1:-origin/main}"
+
+version_in() { git -C "$sdk" show "$1:package.json" 2>/dev/null | jq --raw-output '.version // empty'; }
+
+was="$(version_in "$base")"
+now="$(jq --raw-output '.version' "$sdk/package.json")"
+
+if [ -z "$was" ]; then
+  printf 'no package.json on %s to compare against, so nothing to check\n' "$base"
+  exit 0
+fi
+
+if [ "$was" = "$now" ]; then
+  printf 'the version is still %s.\n\n' "$now" >&2
+  printf 'Every merge to main is a release here: an install names no ref, so what\n' >&2
+  printf 'main points at is what a person gets. Raise the version in package.json,\n' >&2
+  printf 'or this ships as a version that already means something else.\n' >&2
+  exit 1
+fi
+
+printf 'version %s -> %s\n' "$was" "$now"
