@@ -78,6 +78,13 @@ The rule inside `lib/` is one function to a file, because a plugin author goes
 looking for one function. `builder/` is one subject to a file instead, because
 whoever opens it is changing the build and wants the subject together.
 
+## What a plugin's hooks/ holds
+
+Hooks, which a harness runs, and files its hooks source, which nothing runs. The
+second kind ends `-lib.sh`, and `migrations.sh` is one of them under another
+name. The build moves both to `hooks/lib/`, beside the SDK's own, so what is
+left in `hooks/` is what the manifest registers and nothing else.
+
 ## How the build reads a plugin
 
 `plugin.json` is the only manifest. `hooks` is turned into each harness's own

@@ -5,6 +5,7 @@
 payload="$(cat)"
 
 . "$(dirname "$0")/lib/say.sh"
+. "$(dirname "$0")/lib/greeting-lib.sh"
 . "$(dirname "$0")/lib/state.sh"
 
 apply_migrations
@@ -14,8 +15,8 @@ if [ -n "$session_id" ]; then plugin_mark "said/$session_id"; fi
 
 said() {
   if setting_on GREETING; then
-    printf 'Rules for this session%s.\n\n' \
-      "$([ -n "$(setting_value GREETING_NAME)" ] && printf ', %s' "$(setting_value GREETING_NAME)")"
+    greeting_for "$([ -n "$(setting_value GREETING_NAME)" ] && printf ', %s' "$(setting_value GREETING_NAME)")"
+    printf '\n\n' 
   fi
   sed "s/{ceiling}/$(setting_value LINE_CEILING)/" "$PLUGIN_ROOT/rules/house.md"
 }
