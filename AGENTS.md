@@ -6,6 +6,16 @@ This is the SDK a plugin runs to build its distributions. It knows harnesses and
 clients. It does not know any plugin, and a test fails when something here names
 one.
 
+## Every merge is a release
+
+An install names no ref — `npx ai-plugin-sdk`, or a clone — so whatever the
+default branch points at is what a plugin gets. Trunk-based: short branches,
+merged often, and every one of them raises the version in `package.json`.
+
+CI fails a pull request whose version matches its base. Run it yourself with
+`tests/version-changed`. It is not in `tests/run-tests`, because a branch is
+allowed to be mid-change; the merge is what has to carry the bump.
+
 ## Before you push
 
     tests/run-tests
