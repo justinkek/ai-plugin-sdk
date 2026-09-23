@@ -12,9 +12,26 @@ An install names no ref — `npx ai-plugin-sdk`, or a clone — so whatever the
 default branch points at is what a plugin gets. Trunk-based: short branches,
 merged often, and every one of them raises the version in `package.json`.
 
-CI fails a pull request whose version matches its base. Run it yourself with
-`tests/version-changed`. It is not in `tests/run-tests`, because a branch is
-allowed to be mid-change; the merge is what has to carry the bump.
+CI fails a pull request whose version matches its base, or whose version went
+backwards. Run it yourself with `tests/version-changed`. It is not in
+`tests/run-tests`, because a branch is allowed to be mid-change; the merge is
+what has to carry the bump.
+
+Which digit moves is one question: **would a plugin built against the last
+version break on this one?**
+
+| | When |
+| --- | --- |
+| minor, `0.X.0` | yes — a function moved between files in `lib/`, a name changed, `build` needs something new beside it, `plugin.json` wants a field it did not want before |
+| patch, `0.2.X` | no — a fix that leaves the same names in the same places, a function added, a page, a test, this file |
+
+0.2.0 was a minor because `installed_version`, `apply_migrations` and
+`plugin_mark*` moved out of `lib/settings.sh` into `lib/state.sh`, and a hook
+sourcing `settings.sh` to call `installed_version` breaks. The cloud
+`refresh.sh` was doing exactly that, and the tests caught it.
+
+Adding something is a patch here rather than a minor, because the only question
+a plugin author is asking is whether their plugin still works.
 
 ## Before you push
 

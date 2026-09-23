@@ -25,11 +25,24 @@ if [ -z "$was" ]; then
   exit 0
 fi
 
+# A bump that goes backwards, or sideways into a typo, is a bump that names a
+# version somebody already has.
+newest() { printf '%s\n%s\n' "$1" "$2" | sort --version-sort | tail -1; }
+
+if [ "$was" != "$now" ] && [ "$(newest "$was" "$now")" != "$now" ]; then
+  printf 'the version went from %s back to %s.\n\n' "$was" "$now" >&2
+  printf 'An install caches by version, so a number somebody already has is a\n' >&2
+  printf 'number that reaches nobody. Raise it instead.\n' >&2
+  exit 1
+fi
+
 if [ "$was" = "$now" ]; then
   printf 'the version is still %s.\n\n' "$now" >&2
   printf 'Every merge to main is a release here: an install names no ref, so what\n' >&2
   printf 'main points at is what a person gets. Raise the version in package.json,\n' >&2
-  printf 'or this ships as a version that already means something else.\n' >&2
+  printf 'or this ships as a version that already means something else.\n\n' >&2
+  printf 'Minor when a plugin built against %s would break on this one; patch\n' "$was" >&2
+  printf 'when it would not. AGENTS.md has the rule.\n' >&2
   exit 1
 fi
 
