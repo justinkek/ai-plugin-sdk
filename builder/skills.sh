@@ -148,13 +148,40 @@ settings_idle() {
 # The settings skill is the one page written from the manifest rather than from
 # a file, so the keys a plugin declares are the keys it names. Where a plugin
 # has no pair that turns another off, that section of the skill goes.
+# How the skill is told to write a setting. Where the install has a directory
+# the steps can name, that is the SDK's script; where it has none, there is no
+# path to run, so the steps say what the script would have done.
+how_to_write_a_setting() {
+  if [ -z "$harness_root" ]; then
+    printf '%s\n' 'Refuse a value the table above does not allow, saying what it takes and writing'
+    printf '%s\n' 'nothing; where the file already holds one, say so, since the hooks read it as'
+    printf '%s\n\n' 'the default.'
+    printf '%s\n' 'If the file is not there, create and add the setting.'
+    printf '%s\n' 'Else, read the file, replace or add the setting, and write it back.'
+    printf '%s\n' 'Leave the rest of the file as it is, comments included.'
+    return 0
+  fi
+
+  printf '%s\n\n' 'Run this once per key, and edit no file yourself:'
+  printf '```\n'
+  printf 'bash "%s/set-setting.sh" <key> <value>\n' "$harness_root"
+  printf '```\n\n'
+  printf '%s\n' 'It creates the file if it is not there, puts the new value where the old one'
+  printf '%s\n' 'was, and leaves the rest of the file as it is, comments included. It writes'
+  printf '%s\n' 'nothing and says what the setting takes when the value is one it cannot take,'
+  printf '%s\n\n' 'so pass on what it says rather than trying again.'
+  printf '%s\n' 'Where the file already holds a value for the key, say so before running it,'
+  printf '%s\n' 'since the hooks read it as the default.'
+}
+
 settings_skill() {
   local out="$1/skills/settings/SKILL.md"
   [ -f "$out" ] || return 0
-  python3 - "$out" "$(settings_table)" "$(settings_idle)" <<'FILL'
+  python3 - "$out" "$(settings_table)" "$(settings_idle)" "$(how_to_write_a_setting)" <<'FILL'
 import pathlib, sys
-out, table, idle = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+out, table, idle, writing = (pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
 text = out.read_text().replace("{{settings-table}}", table)
+text = text.replace("{{how-to-write-a-setting}}", writing)
 if idle.strip():
     text = text.replace("{{settings-idle-example}}", idle)
 else:
