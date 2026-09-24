@@ -4,7 +4,7 @@
 
 # Two plugins that restrict what a tool call may do are installed side by side,
 # and one of them allowing a call must never undo another refusing it. Claude
-# Code and Codex decide that themselves across every hook they run. Pi hands
+# Code decides that itself across every hook it runs. Pi hands
 # each extension the call in turn and stops at the first block, so what the SDK
 # decides is how one plugin's own hooks add up: a deny outranks an ask, and an
 # ask outranks an allow, whatever order they ran in.

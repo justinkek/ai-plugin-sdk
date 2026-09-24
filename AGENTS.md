@@ -155,10 +155,11 @@ Two plugins that restrict tool calls are installed side by side, and one hook
 allowing a call must never undo another refusing it. Deny outranks ask, and ask
 outranks allow, whichever plugin each came from and whatever order they ran in.
 
-Claude Code and Codex run every registered hook on a call and decide that
-themselves, so the SDK only registers. Pi hands the call to each extension in
-turn, stops at the first one that blocks and lets nothing after it undo that, so
-across plugins the rule holds there as well. What the SDK decides is how one
+Claude Code runs every registered hook on a call and takes the strictest
+answer itself, so there the SDK only registers. Codex runs every registered
+hook too, and no test here holds what it does with two that disagree. Pi hands
+the call to each extension in turn, stops at the first one that blocks and lets
+nothing after it undo that, so across plugins the rule holds there as well. What the SDK decides is how one
 plugin's own hooks add up on Pi: `harnesses/pi/src/index.ts` takes the
 strictest, and asks a person where the strictest is an ask, blocking when
 nobody is there to answer. `tests/test-a-deny-outranks-an-allow.sh` holds it.
