@@ -12,6 +12,12 @@ Blank lines and lines opening with `#` are ignored, and the last assignment of a
 
 `{{prefix}}_HOME` moves the settings file and the state under it together.
 
+A project can hold settings of its own in `.{{name}}/settings` at its root, in
+the same shape. The hooks read it before `{{home}}/settings`, and an
+environment variable before either. Write there when the user wants a value
+for everyone working in the project rather than for themselves, and say that
+it is a file to commit.
+
 ## Before writing anything
 
 Read the steps below. Where they say no hook runs, write no
