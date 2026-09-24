@@ -77,26 +77,72 @@ settings_table() {
 }
 
 # A setting another setting has turned off. The skill says so rather than
-# reporting a value that changes nothing.
+# reporting a value that changes nothing. Each piece below writes one part of
+# that section, so each can be read, and checked, on its own.
+
+# The keys a plugin says another setting turns off, one to a line.
+idle_keys() {
+  settings_json | jq --raw-output 'to_entries[] | select(.value.idle) | .key'
+}
+
+# One field of what a plugin says about the pair: the key that does the turning
+# off, the value it is set to, what that key does, or what the other stops doing.
+idle_says() {
+  settings_json | jq --raw-output --arg key "$1" --arg field "$2" '.[$key].idle[$field] // ""'
+}
+
+# The two rows a reader compares: the key that was set, then the key it turned
+# off, which keeps its value and says why the value does nothing.
+idle_rows() {
+  local key="$1" turns value default held
+  turns="$(idle_says "$key" key)"
+  value="$(idle_says "$key" value)"
+  default="$(settings_json | jq --raw-output --arg k "$key" '.[$k].default // ""')"
+
+  if [ -n "$default" ]; then
+    held="\`$default\` (set - n.a. because \`${prefix}_$turns\` is set to \`$value\`)"
+  else
+    held="set - n.a. because \`${prefix}_$turns\` is set to \`$value\`"
+  fi
+
+  printf '%s\n' "| Key                                        | Value |"
+  printf '%s\n' "| ------------------------------------------ | ----- |"
+  printf '%s\n' "| \`${prefix}_$turns\` | \`$value\` (set) |"
+  printf '%s\n' "| \`${prefix}_$key\` | $held |"
+}
+
+# How many pairs a plugin has, written the way a sentence opens.
+idle_count() {
+  case "$1" in
+    1) printf 'One pair does this.' ;;
+    2) printf 'Two pairs do this.' ;;
+    *) printf '%s pairs do this.' "$1" ;;
+  esac
+}
+
+# One clause per pair, in the plugin's own words, on the same line as the count.
+idle_reasons() {
+  local key
+  while read -r key; do
+    [ -n "$key" ] || continue
+    printf ' `%s_%s = %s` %s, so `%s_%s` %s.' \
+      "$prefix" "$(idle_says "$key" key)" "$(idle_says "$key" value)" \
+      "$(idle_says "$key" because)" "$prefix" "$key" "$(idle_says "$key" so)"
+  done < <(idle_keys)
+}
+
 settings_idle() {
-  settings_json | jq --raw-output --arg prefix "$prefix" '
-    [to_entries[] | select(.value.idle)] as $idle
-    | if ($idle | length) == 0 then empty else
-      ($idle[0]) as $first
-      | "| Key                                        | Value |",
-        "| ------------------------------------------ | ----- |",
-        "| `\($prefix)_\($first.value.idle.key)` | `\($first.value.idle.value)` (set) |",
-        "| `\($prefix)_\($first.key)` | "
-          + (if ($first.value.default // "") != "" then "`\($first.value.default)` (set - n.a." else "set - n.a." end)
-          + " because `\($prefix)_\($first.value.idle.key)` is set to `\($first.value.idle.value)`"
-          + (if ($first.value.default // "") != "" then ") |" else " |" end),
-        "",
-        (if ($idle | length) == 1 then "One pair does this."
-         elif ($idle | length) == 2 then "Two pairs do this."
-         else "\($idle | length) pairs do this." end)
-        + ($idle | map(" `\($prefix)_\(.value.idle.key) = \(.value.idle.value)` \(.value.idle.because), so `\($prefix)_\(.key)` \(.value.idle.so).") | join(""))
-    end
-  ' | pathed
+  local keys count
+  keys="$(idle_keys)"
+  [ -n "$keys" ] || return 0
+  count="$(printf '%s\n' "$keys" | grep --count .)"
+  {
+    idle_rows "$(printf '%s\n' "$keys" | head -1)"
+    printf '\n'
+    idle_count "$count"
+    idle_reasons
+    printf '\n'
+  } | pathed
 }
 
 # The settings skill is the one page written from the manifest rather than from
