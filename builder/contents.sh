@@ -96,12 +96,20 @@ commands() {
   done
 }
 
+# The script the settings skill runs to write one setting. It reads the
+# libraries beside the hooks, so it goes where they do and nowhere else.
+setting_writer() {
+  local target="$1"
+  [ "$(jq '.settings // {} | length' "$manifest")" != "0" ] || return 0
+  cp "$sdk/set-setting.sh" "$target/set-setting.sh"
+}
+
 contents() {
   local harness="$1" target="$2"
   mkdir -p "$target"
   cp "$manifest" "$target/plugin.json"
 
-  if ships "$harness" hooks; then hooks "$target"; fi
+  if ships "$harness" hooks; then hooks "$target"; setting_writer "$target"; fi
   shipped "$target"
   if ships "$harness" skills; then skills "$harness" "$target"; fi
   if ships "$harness" commands; then commands "$target"; fi
