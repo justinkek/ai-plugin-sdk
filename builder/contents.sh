@@ -61,7 +61,7 @@ hooks() {
   mkdir -p "$target/hooks/lib"
   cp "$plugin"/hooks/*.sh "$target/hooks/" 2>/dev/null || true
   # The SDK's own hooks, which a plugin does not write and does not register.
-  if has_session_start; then cp "$sdk"/hooks/*.sh "$target/hooks/"; fi
+  for helper in $(sdk_hooks); do cp "$sdk/hooks/$helper" "$target/hooks/"; done
   # lib/ is a directory per subject with one function to a file, so it is copied
   # whole. settings.json is the build's, not a hook's.
   cp -R "$sdk"/lib/. "$target/hooks/lib/"

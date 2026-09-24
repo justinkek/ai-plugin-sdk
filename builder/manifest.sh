@@ -33,16 +33,33 @@ published="https://github.com/$repository/blob/main"
 # has a session start print gets the pair of hooks that carries it.
 effective_hooks() {
   jq '
-    if ((.hooks.SessionStart // []) | length) > 0 then
+    ["mark-session-started.sh", "print-session-start-if-missed.sh", "replay-notes.sh"] as $ours
+    | if ((.hooks // {}) | length) == 0 then {} else
       .hooks
-      | .SessionStart += ["mark-session-started.sh"]
-      | .UserPromptSubmit = (["print-session-start-if-missed.sh"] + (.UserPromptSubmit // []))
-    else (.hooks // {}) end
+      # A plugin that names a hook the SDK owns is naming a file it did not
+      # write, and the SDK registers that file itself. Naming it twice would
+      # run it twice.
+      | with_entries(.value |= (. - $ours))
+      | (if ((.SessionStart // []) | length) > 0 then
+           .SessionStart += ["mark-session-started.sh"]
+           | .UserPromptSubmit = (["print-session-start-if-missed.sh"] + (.UserPromptSubmit // []))
+         else . end)
+      # A note the last turn left is read last, next to the prompt it is about.
+      | .UserPromptSubmit = ((.UserPromptSubmit // []) + ["replay-notes.sh"])
+    end
   ' "$manifest"
 }
 
-# Whether this plugin has a session start print for the SDK to carry.
-has_session_start() { [ "$(jq '(.hooks.SessionStart // []) | length' "$manifest")" != "0" ]; }
+# Which of the SDK's own hooks this plugin's distributions carry: whatever the
+# registration above names, so a file copied and a file registered cannot differ.
+sdk_hooks() {
+  local script named
+  for script in "$sdk"/hooks/*.sh; do
+    named="$(basename "$script")"
+    effective_hooks | jq --exit-status --arg s "$named" 'any(.[]?[]; . == $s)' >/dev/null \
+      && printf '%s\n' "$named"
+  done
+}
 
 # The hooks a person is asked to trust, counted once for every page that says
 # how many there are.
