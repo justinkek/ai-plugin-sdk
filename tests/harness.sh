@@ -19,8 +19,14 @@ PREFIX="$(printf '%s' "$NAME" | tr '[:lower:]-' '[:upper:]_')"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-BUILT="$WORK/distributions"
-"$SDK/build" "$PLUGIN" "$BUILT" "$WORK/INSTALL.md" >/dev/null
+# One build serves every test in a run: run-tests makes it once and puts its
+# directory in AI_PLUGIN_SDK_TEST_BUILD, so the tests read one set of folders
+# rather than each making its own. A test run on its own is given no such
+# directory and builds into the one it throws away at the end.
+OUT="${AI_PLUGIN_SDK_TEST_BUILD:-$WORK}"
+BUILT="$OUT/distributions"
+INSTALL="$OUT/INSTALL.md"
+[ -d "$BUILT" ] || "$SDK/build" "$PLUGIN" "$BUILT" "$INSTALL" >/dev/null
 
 pass=0
 fail=0

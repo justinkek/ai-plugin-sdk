@@ -11,7 +11,7 @@ diff --recursive --unified "$BUILT" "$WORK/again" > "$WORK/drift"
 assert "and writes the same thing both times" "$?" \
   "the build is not deterministic, so a committed folder drifts on every run"
 
-diff --unified "$WORK/INSTALL.md" "$WORK/INSTALL-again.md" > "$WORK/page-drift"
+diff --unified "$INSTALL" "$WORK/INSTALL-again.md" > "$WORK/page-drift"
 assert "and the same install page" "$?" "the page drifts on every run"
 
 # Only when the plugin commits them. A directory left behind by someone running
@@ -78,7 +78,7 @@ done
 
 printf "\nTest group: nothing the build writes still holds a placeholder\n"
 
-left="$(grep --recursive --only-matching '{{[a-z-]*}}' "$BUILT" "$WORK/INSTALL.md" | sort --unique || true)"
+left="$(grep --recursive --only-matching '{{[a-z-]*}}' "$BUILT" "$INSTALL" | sort --unique || true)"
 [ -z "$left" ]
 assert "every {{name}} was filled in" "$?" "$left reached a reader unfilled"
 
