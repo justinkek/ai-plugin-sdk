@@ -17,8 +17,7 @@
 			"say-the-rule.sh"
 		],
 		"UserPromptSubmit": [
-			"replay-notes.sh"
-		],
+			],
 		"Stop": [
 			"note-a-long-reply.sh"
 		]

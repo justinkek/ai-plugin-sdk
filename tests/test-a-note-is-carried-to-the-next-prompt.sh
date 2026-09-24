@@ -47,4 +47,37 @@ env "${PREFIX}_HOME=$WORK/notes-home" "${PREFIX}_STOP_NOTE_DIRECTORY=$WORK/elsew
 assert "the setting moves the notes" "$?" \
   "a harness that hands the hooks a directory of its own is ignored"
 
+printf "\nTest group: the replay is the SDK's, so a plugin does not write one\n"
+
+HOOKS="$BUILT/$(distributions | head -1)/hooks"
+
+[ -f "$HOOKS/replay-notes.sh" ]
+assert "the build wrote the replay hook" "$?" "every plugin would write its own"
+
+for distribution in $(distributions); do
+  for where in "$BUILT/$distribution/hooks/hooks.json" "$BUILT/$distribution/settings.json"; do
+    [ -f "$where" ] || continue
+    [ "$(grep --count --fixed-strings 'replay-notes.sh' "$where")" = "1" ]
+    assert "$distribution registers it once" "$?" "a note would be replayed twice or not at all"
+  done
+done
+
+prompted() {
+  printf '{"hook_event_name":"UserPromptSubmit","session_id":"%s","prompt":"x"}' "$1" \
+    | env "${PREFIX}_HOME=$WORK/replay-home" bash "$HOOKS/replay-notes.sh"
+}
+
+env "${PREFIX}_HOME=$WORK/replay-home" \
+  bash -c ". \"$LIB/notes.sh\" && stop_note_record sr \"what the last turn left\""
+
+said="$(prompted sr)"
+printf '%s' "$said" | jq --exit-status '.hookSpecificOutput.additionalContext == "what the last turn left"' >/dev/null
+assert "the next prompt is given the note" "$?" "it said '$said'"
+
+[ -z "$(prompted sr)" ]
+assert "and the prompt after it is not" "$?" "the note is replayed on every prompt"
+
+[ -z "$(prompted nothing-written)" ]
+assert "a session with no note is told nothing" "$?" "it speaks up with nothing to say"
+
 counted
