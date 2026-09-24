@@ -171,7 +171,9 @@ how_to_write_a_setting() {
   printf '%s\n' 'nothing and says what the setting takes when the value is one it cannot take,'
   printf '%s\n\n' 'so pass on what it says rather than trying again.'
   printf '%s\n' 'Where the file already holds a value for the key, say so before running it,'
-  printf '%s\n' 'since the hooks read it as the default.'
+  printf '%s\n\n' 'since the hooks read it as the default.'
+  printf '%s\n' 'For the project'"'"'s own file, put `--project <directory>` before the key,'
+  printf '%s\n' 'naming the root of the project.'
 }
 
 settings_skill() {

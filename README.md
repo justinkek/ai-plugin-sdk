@@ -71,6 +71,15 @@ A value the kind does not take is refused and the default stands, because a
 hook that reads a value it has no rule for is worse than one reading the
 default. `{state}` and `{home}` in a default are filled in at run time.
 
+A setting is read from the environment first, then from the project's own
+`.<name>/settings`, then from the person's `~/.<name>/settings`, then the
+default. The project's file is the nearest one at or above the directory the
+hook runs in, and a hook that has a payload can name that directory outright:
+
+```bash
+settings_from_project "$(hook_field "$payload" cwd)"
+```
+
 ## What a hook can read
 
 Every hook script gets `hooks/lib/` beside it. Source the subject you need:
@@ -81,7 +90,7 @@ Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 | `lib/say.sh` | `hook_say` and `hook_say_aloud`, the one answer shape every client reads |
 | `lib/reply.sh` | `hook_last_reply`, out of the payload or out of a transcript |
 | `lib/notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
-| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set` |
+| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set`, `settings_from_project` |
 | `lib/state.sh` | `installed_version`, `apply_migrations`, `plugin_mark` |
 
 Each of those is a directory beside it with one function to a file, so
