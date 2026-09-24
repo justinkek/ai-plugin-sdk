@@ -37,7 +37,9 @@ done < <(declared)
 
 printf "\nTest group: what it refuses, it does not write\n"
 
-first="$(declared | head -1)"
+# A text setting takes any value, so there is nothing for it to refuse. The
+# first key of another kind is the one tried, where there is one.
+first="$(jq --raw-output '.settings // {} | to_entries | (map(select((.value.kind // "text") != "text")) + .)[0].key // empty' "$MANIFEST")"
 kind="$(jq --raw-output --arg k "$first" '.settings[$k].kind // "text"' "$MANIFEST")"
 
 held="$(reads "$first")"
