@@ -146,6 +146,7 @@ Each of these was a real failure on a real client, and something here holds it:
 | two plugins must not drain each other's notes | `lib/notes.sh`, under the plugin's own home |
 | a shell too old fails with a sentence, not a syntax error | `lib/shell.sh`, sourced by both roots of the graph |
 | a plugin with no session start hook still gets a manifest bash can read | `builder/contents.sh` |
+| and its cloud checkout is still refreshed at session start | `registration` in `builder/harnesses.sh` |
 | one plugin allowing a tool call never undoes another refusing it | the rule below |
 
 ## A deny outranks an allow

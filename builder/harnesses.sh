@@ -58,12 +58,15 @@ named_harness() {
 
 # How a harness is told about a hook: every command runs the script through an
 # interpreter, because a client that extracts without the executable bit runs
-# nothing otherwise.
+# nothing otherwise. An event the harness registers a hook of its own for is
+# registered whether or not the plugin names it: the cloud refresh runs at
+# session start for a plugin that prints nothing there.
 registration() {
   local harness="$1" root="$2"
   effective_hooks \
     | jq --tab --arg root "$root" --slurpfile harness "$sdk/harnesses/$harness/harness.json" '
-    {hooks: (to_entries | map({
+    reduce (($harness[0].own // {}) | keys[]) as $event (.; .[$event] //= [])
+    | {hooks: (to_entries | map({
       key: .key,
       value: [ { hooks:
         ((($harness[0].own[.key] // []) | map({type: "command", command: ("bash \"" + $root + "/" + . + "\"")}))

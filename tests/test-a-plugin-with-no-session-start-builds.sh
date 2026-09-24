@@ -34,4 +34,12 @@ complaint="$(printf '{}' | bash -c ". \"$WORK/quiet-built/claude/hooks/lib/setti
 [ -z "$complaint" ]
 assert "the settings library sources without a word on stderr" "$?" "$complaint"
 
+printf "\nTest group: the cloud checkout is still refreshed at session start\n"
+
+refreshes="$(jq --raw-output '.hooks.SessionStart[]?.hooks[]?.command' "$WORK/quiet-built/claude-code-cloud/settings.json" \
+  | grep --count --fixed-strings 'refresh.sh')"
+[ "$refreshes" = "1" ]
+assert "refresh.sh is registered once" "$?" \
+  "it is registered $refreshes times, and a container that has been up for days runs last week's copy"
+
 counted

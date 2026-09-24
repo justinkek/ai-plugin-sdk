@@ -5,6 +5,11 @@
 # A client that runs no session start hook would otherwise never be given what
 # the plugin prints there. The SDK registers a pair of hooks that carries it to
 # the first prompt instead, and the plugin writes neither of them.
+if [ -z "$(jq --raw-output '.hooks.SessionStart[]? // empty' "$MANIFEST")" ]; then
+  printf "  SKIP  this plugin prints nothing at session start, so there is nothing to carry\n"
+  exit 0
+fi
+
 printf "Test group: a session start nobody heard is printed on the first prompt\n"
 
 HOOKS="$BUILT/$(distributions | head -1)/hooks"
