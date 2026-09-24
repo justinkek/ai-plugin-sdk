@@ -97,10 +97,12 @@ commands() {
 }
 
 # The script the settings skill runs to write one setting. It reads the
-# libraries beside the hooks, so it goes where they do and nowhere else.
+# libraries beside the hooks, so it goes where they do and nowhere else. The
+# settings every plugin gets count, so a plugin declaring none of its own still
+# has a skill that names this script.
 setting_writer() {
   local target="$1"
-  [ "$(jq '.settings // {} | length' "$manifest")" != "0" ] || return 0
+  [ "$(settings_json | jq 'length')" != "0" ] || return 0
   cp "$sdk/set-setting.sh" "$target/set-setting.sh"
 }
 
