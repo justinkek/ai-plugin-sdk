@@ -11,10 +11,18 @@ SECTION="$WORK/idle-section"
 
 sed -n '/A key another setting has turned off/,/## What not to do/p' "$SKILL" > "$SECTION"
 
-# The pairs the manifest declares, in the order the skill takes them.
-pairs() {
-  jq --raw-output '.settings // {} | to_entries[] | select(.value.idle) | .key' "$MANIFEST"
+# Every setting an install has: the SDK's, then the plugin's over them, which
+# is the order the skill takes them in.
+settings() {
+  jq --slurpfile declared <(jq '.settings // {}' "$MANIFEST") \
+    '. * ($declared[0] // {})' "$SDK/lib/settings.json"
 }
+
+# The pairs where one setting turns another off.
+pairs() { settings | jq --raw-output 'to_entries[] | select(.value.idle) | .key'; }
+
+# One field of what is said about a pair.
+says() { settings | jq --raw-output --arg k "$1" --arg f "$2" '.[$k].idle[$f] // ""'; }
 
 count="$(pairs | grep --count . || true)"
 
@@ -28,9 +36,9 @@ if [ "$count" = "0" ]; then
 fi
 
 first="$(pairs | head -1)"
-turns="$(jq --raw-output --arg k "$first" '.settings[$k].idle.key' "$MANIFEST")"
-value="$(jq --raw-output --arg k "$first" '.settings[$k].idle.value' "$MANIFEST")"
-default="$(jq --raw-output --arg k "$first" '.settings[$k].default // ""' "$MANIFEST")"
+turns="$(says "$first" key)"
+value="$(says "$first" value)"
+default="$(settings | jq --raw-output --arg k "$first" '.[$k].default // ""')"
 
 grep --quiet --fixed-strings "| \`${PREFIX}_$turns\` | \`$value\` (set) |" "$SECTION"
 assert "the row for the key that was set shows its value" "$?" \
@@ -57,10 +65,10 @@ printf "\nTest group: and says in words what each pair does\n"
 
 while read -r key; do
   [ -n "$key" ] || continue
-  turns="$(jq --raw-output --arg k "$key" '.settings[$k].idle.key' "$MANIFEST")"
-  value="$(jq --raw-output --arg k "$key" '.settings[$k].idle.value' "$MANIFEST")"
-  because="$(jq --raw-output --arg k "$key" '.settings[$k].idle.because' "$MANIFEST")"
-  so="$(jq --raw-output --arg k "$key" '.settings[$k].idle.so' "$MANIFEST")"
+  turns="$(says "$key" key)"
+  value="$(says "$key" value)"
+  because="$(says "$key" because)"
+  so="$(says "$key" so)"
 
   grep --quiet --fixed-strings \
     "\`${PREFIX}_$turns = $value\` $because, so \`${PREFIX}_$key\` $so." "$SECTION"

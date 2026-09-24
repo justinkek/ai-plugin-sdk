@@ -80,10 +80,18 @@ done < <(declared)
 
 printf "\nTest group: and names no key nothing reads\n"
 
+# What a plugin declares, what every plugin gets from the SDK, and the one key
+# that moves the lot.
+readable() {
+  declared
+  jq --raw-output 'keys[]' "$SDK/lib/settings.json"
+  printf 'HOME\n'
+}
+
 while read -r named; do
   # Unquoted on purpose: one key to a line for grep.
   # shellcheck disable=SC2046
-  printf '%s\n' $(declared) "STOP_NOTE_DIRECTORY" "HOME" | grep --quiet --line-regexp "${named#${PREFIX}_}"
+  readable | grep --quiet --line-regexp "${named#${PREFIX}_}"
   assert "$named is a setting something reads" "$?" \
     "the skill offers it and no hook would ever read it"
 done < <(grep --only-matching --extended-regexp "${PREFIX}_[A-Z_]+" "$SKILL" | sort --unique)
