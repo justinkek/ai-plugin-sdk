@@ -35,6 +35,12 @@ plugin_manifest_sh() {
   printf '\n'
   case_function plugin_setting_values \
     'to_entries[] | select(.value.values) | "    \(.key)) printf %s \((.value.values | join(" ")) | @sh) ;;"'
+
+  # What this plugin prints at the start of a session, for the SDK's own hook
+  # that prints it again on a client that never carried it.
+  printf '\nplugin_session_start_hooks() {\n'
+  jq --raw-output $'.hooks.SessionStart[]? | "  printf \'%s\\\\n\' " + (. | @sh)' "$manifest"
+  printf '}\n'
 }
 
 # A generated file says so on its second line, so a reader who opens one knows
@@ -54,6 +60,8 @@ hooks() {
   local target="$1" helper
   mkdir -p "$target/hooks/lib"
   cp "$plugin"/hooks/*.sh "$target/hooks/" 2>/dev/null || true
+  # The SDK's own hooks, which a plugin does not write and does not register.
+  if has_session_start; then cp "$sdk"/hooks/*.sh "$target/hooks/"; fi
   # lib/ is a directory per subject with one function to a file, so it is copied
   # whole. settings.json is the build's, not a hook's.
   cp -R "$sdk"/lib/. "$target/hooks/lib/"
