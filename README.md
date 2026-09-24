@@ -13,12 +13,9 @@ update, uninstall and settings pages, and the four skills that run them.
 
 ## Using it
 
-Run it in your plugin's directory:
+Clone it, and run it in your plugin's directory:
 
-    npx ai-plugin-sdk
-
-or, from a checkout:
-
+    git clone https://github.com/justinkek/ai-plugin-sdk
     path/to/ai-plugin-sdk/build
 
 It reads `plugin.json` and writes `distributions/`, one folder per harness,

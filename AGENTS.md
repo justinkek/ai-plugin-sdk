@@ -15,8 +15,8 @@ writes its `COMPATIBILITY.md` from `compatibility.json` and what each
 
 ## Every merge is a release
 
-An install names no ref — `npx ai-plugin-sdk`, or a clone — so whatever the
-default branch points at is what a plugin gets. Trunk-based: short branches,
+A plugin clones this repository and names no ref, so whatever the default
+branch points at is what it gets. Trunk-based: short branches,
 merged often, and every one of them raises the version in `package.json`.
 
 CI fails a pull request whose version matches its base, or whose version went

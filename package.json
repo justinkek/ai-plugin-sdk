@@ -1,25 +1,11 @@
 {
 	"name": "ai-plugin-sdk",
-	"version": "0.5.2",
+	"version": "0.6.0",
 	"description": "Write a plugin once, install it on every client.",
 	"license": "MIT",
-	"bin": {
-		"ai-plugin-sdk": "./build"
-	},
-	"files": [
-		"build",
-		"builder",
-		"lib",
-		"hooks",
-		"harnesses",
-		"clients",
-		"skills",
-		"commands",
-		"set-setting.sh",
-		"compatibility.json"
-	],
 	"author": {
 		"name": "Justin Kek",
 		"email": "justinkekjq@gmail.com"
-	}
+	},
+	"private": true
 }
