@@ -12,7 +12,16 @@ WRITER="$BUILT/$DISTRIBUTION/set-setting.sh"
 LIB="$BUILT/$DISTRIBUTION/hooks/lib/settings.sh"
 HOME_DIR="$WORK/written"
 
-declared() { jq --raw-output '.settings // {} | keys[]' "$MANIFEST"; }
+# What the skill offers: the plugin's own settings over the ones every plugin
+# gets, less the update check when there is no repository to check against.
+# A plugin that declares none of its own is still offered the SDK's.
+offered() {
+  jq --slurp '. as [$sdk, $plugin] | ($sdk * ($plugin.settings // {}))
+    | if $plugin.repository then . else del(.UPDATE_CHECK, .UPDATE_CHECK_DAYS, .VERSION_SOURCE) end' \
+    "$SDK/lib/settings.json" "$MANIFEST"
+}
+declared() { offered | jq --raw-output 'keys[]'; }
+kind_of() { offered | jq --raw-output --arg k "$1" '.[$k].kind // "text"'; }
 
 [ -f "$WRITER" ]
 assert "the build wrote the script" "$?" "the skill has nothing to run"
@@ -23,10 +32,10 @@ reads() { env "${PREFIX}_HOME=$HOME_DIR" bash -c ". \"$LIB\" && setting_value $1
 # One key of each kind, with a value that kind takes.
 while read -r key; do
   [ -n "$key" ] || continue
-  case "$(jq --raw-output --arg k "$key" '.settings[$k].kind // "text"' "$MANIFEST")" in
+  case "$(kind_of "$key")" in
     count) held=4 ;;
     switch) held=off ;;
-    choice) held="$(jq --raw-output --arg k "$key" '.settings[$k].values[-1]' "$MANIFEST")" ;;
+    choice) held="$(offered | jq --raw-output --arg k "$key" '.[$k].values[-1]')" ;;
     *) continue ;;
   esac
 
@@ -37,8 +46,12 @@ done < <(declared)
 
 printf "\nTest group: what it refuses, it does not write\n"
 
-first="$(declared | head -1)"
-kind="$(jq --raw-output --arg k "$first" '.settings[$k].kind // "text"' "$MANIFEST")"
+# A text setting takes any value, so it has nothing to refuse. Ask one that can.
+first="$(declared | while read -r key; do
+  [ "$(kind_of "$key")" = "text" ] || { printf '%s' "$key"; break; }
+done)"
+[ -n "$first" ] || first="$(declared | head -1)"
+kind="$(kind_of "$first")"
 
 held="$(reads "$first")"
 writes "$first" 'not-a-value-any-kind-takes' >/dev/null 2>&1
@@ -64,7 +77,7 @@ printf '# a person wrote this\n\n%s_%s = %s\n# and this\n' \
 case "$kind" in
   count) other=9 ;;
   switch) other=on ;;
-  choice) other="$(jq --raw-output --arg k "$first" '.settings[$k].values[0]' "$MANIFEST")" ;;
+  choice) other="$(offered | jq --raw-output --arg k "$first" '.[$k].values[0]')" ;;
   *) other=something ;;
 esac
 
