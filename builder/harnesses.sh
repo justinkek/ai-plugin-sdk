@@ -61,12 +61,13 @@ named_harness() {
 # nothing otherwise.
 registration() {
   local harness="$1" root="$2"
-  jq --tab --arg root "$root" --slurpfile harness "$sdk/harnesses/$harness/harness.json" '
-    {hooks: (.hooks | to_entries | map({
+  effective_hooks \
+    | jq --tab --arg root "$root" --slurpfile harness "$sdk/harnesses/$harness/harness.json" '
+    {hooks: (to_entries | map({
       key: .key,
       value: [ { hooks:
         ((($harness[0].own[.key] // []) | map({type: "command", command: ("bash \"" + $root + "/" + . + "\"")}))
          + (.value | map({type: "command", command: ("bash \"" + $root + "/hooks/" + . + "\"")}))) } ]
     }) | from_entries)}
-  ' "$manifest"
+  '
 }
