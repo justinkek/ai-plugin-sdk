@@ -32,8 +32,9 @@ published="https://github.com/$repository/blob/main"
 # it only if something prints it again on the first prompt, so a plugin that
 # has a session start print gets the pair of hooks that carries it.
 effective_hooks() {
-  jq '
-    ["mark-session-started.sh", "print-session-start-if-missed.sh", "replay-notes.sh"] as $ours
+  jq --arg repository "$repository" '
+    ["mark-session-started.sh", "print-session-start-if-missed.sh", "replay-notes.sh",
+     "note-a-new-version.sh"] as $ours
     | if ((.hooks // {}) | length) == 0 then {} else
       .hooks
       # A plugin that names a hook the SDK owns is naming a file it did not
@@ -46,6 +47,10 @@ effective_hooks() {
          else . end)
       # A note the last turn left is read last, next to the prompt it is about.
       | .UserPromptSubmit = ((.UserPromptSubmit // []) + ["replay-notes.sh"])
+      # A plugin with nowhere to read a published version from is never told
+      # there is a newer one.
+      | (if $repository == "" then .
+         else .UserPromptSubmit = (["note-a-new-version.sh"] + .UserPromptSubmit) end)
     end
   ' "$manifest"
 }
@@ -96,8 +101,17 @@ filled() {
 # person reading a page wants the path, so it is filled in here.
 pathed() { sed -e "s|{state}|$home/state|g" -e "s|{home}|$home|g"; }
 
-# The settings a plugin declares, over the ones every plugin gets.
+# The settings a plugin declares, over the ones every plugin gets. The built-in
+# ones are filled first, because one of them names the plugin's repository.
+# A plugin with no repository has nowhere to read a published version from, so
+# it gets neither the update check nor the settings that shape it.
 settings_json() {
-  jq --slurpfile builtin "$sdk/lib/settings.json" \
-    '($builtin[0] // {}) * (.settings // {})' "$manifest"
+  local builtin="$sdk/lib/settings.json" held
+  # An empty root, because a setting is the same on every harness.
+  held="$(filled '' < "$builtin")"
+  if [ -z "$repository" ]; then
+    held="$(printf '%s' "$held" | jq 'del(.UPDATE_CHECK, .UPDATE_CHECK_DAYS, .VERSION_SOURCE)')"
+  fi
+  printf '%s' "$held" | jq --slurpfile declared <(jq '.settings // {}' "$manifest") \
+    '. * ($declared[0] // {})'
 }

@@ -3,5 +3,26 @@
 		"kind": "text",
 		"default": "{state}/notes",
 		"says": "where a turn's notes are written"
+	},
+	"UPDATE_CHECK": {
+		"kind": "switch",
+		"default": "on",
+		"says": "asks once a day whether a newer version is out"
+	},
+	"UPDATE_CHECK_DAYS": {
+		"kind": "count",
+		"default": "1",
+		"says": "days between those asks",
+		"idle": {
+			"key": "UPDATE_CHECK",
+			"value": "off",
+			"because": "asks nothing",
+			"so": "throttles nothing"
+		}
+	},
+	"VERSION_SOURCE": {
+		"kind": "text",
+		"default": "https://raw.githubusercontent.com/{{repository}}/main/package.json",
+		"says": "where the update check reads the published version from"
 	}
 }
