@@ -20,6 +20,12 @@ jobs:
       - name: Install shellcheck and jq
         run: sudo apt-get update && sudo apt-get install --yes shellcheck jq
 
+      # Node runs the Pi extension in the test that holds a deny above an allow,
+      # which skips without it.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Tests, against the example plugin
         run: tests/run-tests
 

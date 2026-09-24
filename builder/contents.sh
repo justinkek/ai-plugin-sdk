@@ -38,8 +38,11 @@ plugin_manifest_sh() {
 
   # What this plugin prints at the start of a session, for the SDK's own hook
   # that prints it again on a client that never carried it.
+  # A plugin with none still needs a body: bash refuses a function with nothing
+  # in it, and every line of the file after that one is never read.
   printf '\nplugin_session_start_hooks() {\n'
-  jq --raw-output $'.hooks.SessionStart[]? | "  printf \'%s\\\\n\' " + (. | @sh)' "$manifest"
+  jq --raw-output $'.hooks.SessionStart[]? | "  printf \'%s\\\\n\' " + (. | @sh)' "$manifest" \
+    | grep . || printf '  return 0\n'
   printf '}\n'
 }
 

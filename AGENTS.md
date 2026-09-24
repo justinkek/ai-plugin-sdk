@@ -145,6 +145,22 @@ Each of these was a real failure on a real client, and something here holds it:
 | a cloud install must merge rather than append | `harnesses/claude-code-cloud/merge-settings.sh` |
 | two plugins must not drain each other's notes | `lib/notes.sh`, under the plugin's own home |
 | a shell too old fails with a sentence, not a syntax error | `lib/shell.sh`, sourced by both roots of the graph |
+| a plugin with no session start hook still gets a manifest bash can read | `builder/contents.sh` |
+| one plugin allowing a tool call never undoes another refusing it | the rule below |
+
+## A deny outranks an allow
+
+Two plugins that restrict tool calls are installed side by side, and one hook
+allowing a call must never undo another refusing it. Deny outranks ask, and ask
+outranks allow, whichever plugin each came from and whatever order they ran in.
+
+Claude Code and Codex run every registered hook on a call and decide that
+themselves, so the SDK only registers. Pi hands the call to each extension in
+turn, stops at the first one that blocks and lets nothing after it undo that, so
+across plugins the rule holds there as well. What the SDK decides is how one
+plugin's own hooks add up on Pi: `harnesses/pi/src/index.ts` takes the
+strictest, and asks a person where the strictest is an ask, blocking when
+nobody is there to answer. `tests/test-a-deny-outranks-an-allow.sh` holds it.
 
 ## Writing
 

@@ -88,6 +88,12 @@ Each of those is a directory beside it with one function to a file, so
 `setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it
 needs, so sourcing `notes.sh` gets you `settings.sh` and `state.sh` as well.
 
+## When two plugins disagree
+
+A hook that runs before a tool call answers allow, ask or deny. Where hooks from
+different plugins answer the same call differently, the strictest answer
+stands: a deny from one plugin is never undone by an allow from another.
+
 ## Which clients it knows
 
 | Client | Harness |
