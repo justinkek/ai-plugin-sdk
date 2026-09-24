@@ -6,10 +6,10 @@
 # and a reader who cannot tell which they have follows the wrong one.
 printf "Test group: every page the build writes opens by saying who it is for\n"
 
-for written in "$BUILT"/*/README.md "$BUILT"/*/clients/*.md "$WORK/INSTALL.md"; do
+for written in "$BUILT"/*/README.md "$BUILT"/*/clients/*.md "$INSTALL"; do
   [ -f "$written" ] || continue
   head -5 "$written" | grep --quiet --fixed-strings '(audience: '
-  assert "${written#$WORK/} says who it is for" "$?" \
+  assert "${written#$OUT/} says who it is for" "$?" \
     "a reader cannot tell whether the steps are theirs to follow"
 done
 

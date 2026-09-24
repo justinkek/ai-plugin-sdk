@@ -1,10 +1,24 @@
 #!/usr/bin/env bash
 
 tests_directory="$(cd "$(dirname "$0")" && pwd)"
+sdk="$(cd "$tests_directory/.." && pwd)"
 plugin="${1:-}"
 pass=0
 fail=0
 failures=""
+
+# Every test reads the same build, so make it here rather than in each of them.
+# harness.sh reads this directory; a test run on its own builds for itself.
+AI_PLUGIN_SDK_TEST_BUILD="$(mktemp -d)"
+export AI_PLUGIN_SDK_TEST_BUILD
+trap 'rm -rf "$AI_PLUGIN_SDK_TEST_BUILD"' EXIT
+
+if ! "$sdk/build" "$(cd "${plugin:-$sdk/example}" && pwd)" \
+  "$AI_PLUGIN_SDK_TEST_BUILD/distributions" \
+  "$AI_PLUGIN_SDK_TEST_BUILD/INSTALL.md" >/dev/null; then
+  printf 'the build failed, so no test can run\n' >&2
+  exit 1
+fi
 
 for test in "$tests_directory"/test-*.sh; do
   name="$(basename "$test")"
