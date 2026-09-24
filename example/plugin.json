@@ -5,6 +5,9 @@
 	"displayName": "example-plugin",
 	"license": "MIT",
 	"repository": "justinkek/ai-plugin-sdk",
+	"ai-plugin-sdk": {
+		"version": "0.6.1"
+	},
 	"author": {
 		"name": "Justin Kek",
 		"email": "justinkekjq@gmail.com"
@@ -16,8 +19,7 @@
 		"SessionStart": [
 			"say-the-rule.sh"
 		],
-		"UserPromptSubmit": [
-			],
+		"UserPromptSubmit": [],
 		"Stop": [
 			"note-a-long-reply.sh"
 		]

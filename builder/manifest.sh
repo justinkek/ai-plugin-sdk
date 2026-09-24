@@ -19,6 +19,17 @@ display="$(says '.displayName // .name')"
 repository="$(says .repository)"
 [ -n "$name" ] && [ -n "$version" ] || { printf 'plugin.json needs a name and a version\n' >&2; exit 1; }
 
+# What this SDK is, and what the plugin says it needs. A plugin that asks for
+# more than this copy has would be built by rules it has not got.
+sdk_version="$(jq --raw-output '.version' "$sdk/package.json")"
+sdk_wanted="$(says '."ai-plugin-sdk".version')"
+if [ -n "$sdk_wanted" ] && [ "$sdk_wanted" != "$sdk_version" ] \
+  && [ "$(printf '%s\n%s\n' "$sdk_version" "$sdk_wanted" | sort --version-sort | tail -1)" = "$sdk_wanted" ]; then
+  printf '%s asks for ai-plugin-sdk %s, and this copy is %s.\n\n' "$name" "$sdk_wanted" "$sdk_version" >&2
+  printf 'Pull the SDK, or lower the version in plugin.json.\n' >&2
+  exit 1
+fi
+
 prefix="$(printf '%s' "$name" | tr '[:lower:]-' '[:upper:]_')"
 # Not a path this shell resolves: it is written into a page for a person to
 # read, where ~ is what they want to see.
