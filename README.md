@@ -13,12 +13,9 @@ update, uninstall and settings pages, and the four skills that run them.
 
 ## Using it
 
-Run it in your plugin's directory:
+Clone it, and run it in your plugin's directory:
 
-    npx ai-plugin-sdk
-
-or, from a checkout:
-
+    git clone https://github.com/justinkek/ai-plugin-sdk
     path/to/ai-plugin-sdk/build
 
 It reads `plugin.json` and writes `distributions/`, one folder per harness,
@@ -45,6 +42,7 @@ so what is committed is what a person gets.
   "version": "0.1.0",
   "description": "What it is for.",
   "repository": "you/example-plugin",
+  "ai-plugin-sdk": { "version": "0.6.1" },
   "ships": ["rules"],
   "hooks": {
     "SessionStart": ["say-the-rule.sh"],
@@ -56,6 +54,11 @@ so what is committed is what a person gets.
   }
 }
 ```
+
+`ai-plugin-sdk.version` is the oldest SDK that can build this plugin. A build
+from an older copy stops and says so rather than writing folders by rules it
+has not got. Leave it out and any copy builds it. The version that did build
+is written at the foot of `INSTALL.md`.
 
 `clients` is optional. Leave it out and the plugin is built for every client the
 SDK knows, minus any it could not reach - a client running neither hooks nor

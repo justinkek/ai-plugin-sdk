@@ -152,6 +152,7 @@ install_page() {
     done
     printf '\n'
     if [ -f "$plugin/install-page/tail.md" ]; then filled < "$plugin/install-page/tail.md"; fi
-    printf '\n## Note\n\n%s\n' "$generated"
+    # The one place that records which SDK wrote the committed folders.
+    printf '\n## Note\n\n%s\nBuilt with ai-plugin-sdk %s.\n' "$generated" "$sdk_version"
   } > "$page"
 }
