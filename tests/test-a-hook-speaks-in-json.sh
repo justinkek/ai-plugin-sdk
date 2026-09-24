@@ -33,8 +33,12 @@ while read -r event script; do
   assert "and names $event, so a client knows what it is answering" "$?" "it named '$named'"
 done < <(jq --raw-output '.hooks | to_entries[] | .key as $event | .value[] | "\($event) \(.)"' "$MANIFEST")
 
-[ "$spoke" -gt 0 ]
-assert "at least one hook speaks at all" "$?" "no hook printed anything, so nothing reaches a session"
+# A hook that guards a tool call has nothing to say to a payload naming no tool,
+# so only a plugin with something to print at session start must have spoken.
+if jq --exit-status '(.hooks.SessionStart // []) | length > 0' "$MANIFEST" >/dev/null; then
+  [ "$spoke" -gt 0 ]
+  assert "at least one hook speaks at all" "$?" "no hook printed anything, so nothing reaches a session"
+fi
 
 printf "\nTest group: a hand run prints the text itself\n"
 

@@ -83,10 +83,19 @@ Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 | `lib/notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
 | `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set` |
 | `lib/state.sh` | `installed_version`, `apply_migrations`, `plugin_mark` |
+| `lib/permission.sh` | `hook_permission`, a deny, ask or allow on the tool call a hook was handed |
 
 Each of those is a directory beside it with one function to a file, so
 `setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it
 needs, so sourcing `notes.sh` gets you `settings.sh` and `state.sh` as well.
+
+## When two plugins disagree
+
+A hook on a tool call answers deny, ask or allow, and every plugin installed
+answers the same call. A deny outranks an ask, and an ask outranks an allow, so
+a plugin that allows a call never lets it past another plugin refusing it.
+Claude Code and Codex merge the answers that way themselves. On Pi the SDK runs
+the hooks, and `strongest_permission` in `lib/permission.sh` is the merge.
 
 ## Which clients it knows
 

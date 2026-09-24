@@ -38,7 +38,9 @@ plugin_manifest_sh() {
 
   # What this plugin prints at the start of a session, for the SDK's own hook
   # that prints it again on a client that never carried it.
-  printf '\nplugin_session_start_hooks() {\n'
+  # A function with an empty body is a syntax error, and a plugin with no
+  # session start hook would otherwise break every library that reads this file.
+  printf '\nplugin_session_start_hooks() {\n  :\n'
   jq --raw-output $'.hooks.SessionStart[]? | "  printf \'%s\\\\n\' " + (. | @sh)' "$manifest"
   printf '}\n'
 }
