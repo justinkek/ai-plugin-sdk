@@ -1,30 +1,76 @@
 # ai-plugin-sdk
 
+<h2 align="center">write once, plugin anywhere</h2>
+
 (audience: humans)
 
-A plugin that prints something into a session, refuses an edit against a rule,
-or carries a note to the next prompt has to be installed somewhere. Doing that
-by hand for seven clients costs more than the plugin does.
+- Create plugins for Claude, Codex, Pi, etc. from a single source.
+- Comes with specific install/update/uninstall/settings instructions for each client, so you can focus on
 
-This is the part that is the same every time. You write a manifest, some hook
-scripts and whatever your plugin is for. The SDK writes the folders each client
-installs from: the hook registrations, the marketplace manifests, the install,
-update, uninstall and settings pages, and the four skills that run them.
+<details>
+<summary>Supported clients</summary>
 
-## Using it
+**Anthropic**
 
-Clone it, and run it in your plugin's directory:
+| Product     | Surface     | Where it runs | Support   |
+| ----------- | ----------- | ------------- | --------- |
+| Claude Chat | Web GUI     | Hosted        | Partial   |
+| Claude Chat | Desktop GUI | Hosted        | Partial   |
+| Claude Chat | Mobile GUI  | Hosted        | Partial   |
+| Cowork      | Web GUI     | Hosted        | Supported |
+| Cowork      | Desktop GUI | Hosted        | Supported |
+| Cowork      | Mobile GUI  | Hosted        | Supported |
+| Claude Code | Web GUI     | Hosted        | Supported |
+| Claude Code | Desktop GUI | Hosted        | Supported |
+| Claude Code | Mobile GUI  | Hosted        | Supported |
+| Claude Code | Desktop GUI | Local         | Supported |
+| Claude Code | CLI         | Local         | Supported |
 
-    git clone https://github.com/justinkek/ai-plugin-sdk
-    path/to/ai-plugin-sdk/build
+**OpenAI**
 
-It reads `plugin.json` and writes `distributions/`, one folder per harness,
-plus `INSTALL.md`. Commit both: an install fetches files from your repository,
-so what is committed is what a person gets.
+| Product      | Surface       | Where it runs | Support       |
+| ------------ | ------------- | ------------- | ------------- |
+| ChatGPT Chat | Web GUI       | Hosted        | Not verified  |
+| ChatGPT Chat | Desktop GUI   | Hosted        | Not verified  |
+| ChatGPT Chat | Mobile GUI    | Hosted        | Not verified  |
+| ChatGPT Work | Web GUI       | Hosted        | Not supported |
+| ChatGPT Work | Desktop GUI   | Local         | Not verified  |
+| ChatGPT Work | Desktop GUI   | Hosted        | Not supported |
+| ChatGPT Work | Mobile GUI    | Hosted        | Not supported |
+| Codex        | Web GUI       | Hosted        | Not supported |
+| Codex        | Desktop GUI   | Local         | Supported     |
+| Codex        | Desktop GUI   | Hosted        | Not supported |
+| Codex        | CLI           | Local         | Supported     |
+| Codex        | IDE extension | Local         | Not supported |
 
-## What a plugin holds
+**ZCode**
 
-    any-plugin
+| Product | Surface     | Where it runs | Support   |
+| ------- | ----------- | ------------- | --------- |
+| ZCode   | Desktop GUI | Local         | Supported |
+
+**Pi**
+
+| Product | Surface | Where it runs | Support |
+| ------- | ------- | ------------- | ------- |
+| Pi      | CLI     | Local         | Partial |
+
+**What is missing where it says Partial**
+
+- **Claude Chat** - No hook runs, so a plugin reaches a conversation only through its skills.
+- **Cowork** - Every conversation runs on Anthropic's servers, whichever app starts it.
+- **Claude Code (Cloud)** - The container is rebuilt for every session, so a setting kept goes in an environment variable.
+- **Codex** - No hook runs until a person has trusted it, and an update un-trusts them all.
+- **Pi** - Skills load from ~/.agents/skills and an extension puts none there, so a plugin's skills do not arrive.
+
+</details>
+
+## Getting started
+
+1. Ensure your plugin has the following structure, and add `plugin.json`
+
+```
+your-plugin
     ├── plugin.json     name, version, clients, hooks by event, settings and defaults
     ├── hooks/          its own scripts, sourcing lib/ beside them
     ├── rules/          whatever it puts into a session, if anything
@@ -33,10 +79,13 @@ so what is committed is what a person gets.
     ├── install-page/   the prose around the install table
     ├── distributions/  generated, committed
     └── tests/          its own behaviour only
+```
 
-## The manifest
+<details>
+<summary>Details</summary>
 
 ```json
+// plugin.json
 {
   "name": "example-plugin",
   "version": "0.1.0",
@@ -50,10 +99,16 @@ so what is committed is what a person gets.
     "Stop": ["note-a-long-reply.sh"]
   },
   "settings": {
-    "LINE_CEILING": { "kind": "count", "default": "8", "says": "the most lines a reply may hold" }
+    "LINE_CEILING": {
+      "kind": "count",
+      "default": "8",
+      "says": "the most lines a reply may hold"
+    }
   }
 }
 ```
+
+## The manifest
 
 `ai-plugin-sdk.version` is the oldest SDK that can build this plugin. A build
 from an older copy stops and says so rather than writing folders by rules it
@@ -84,14 +139,14 @@ settings_from_project "$(hook_field "$payload" cwd)"
 
 Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 
-| Source this | What it gives |
-| --- | --- |
-| `lib/payload.sh` | `hook_field`, which reads a key in either spelling, whichever harness sent it |
-| `lib/say.sh` | `hook_say` and `hook_say_aloud`, the one answer shape every client reads |
-| `lib/reply.sh` | `hook_last_reply`, out of the payload or out of a transcript |
-| `lib/notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
-| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set`, `settings_from_project` |
-| `lib/state.sh` | `installed_version`, `apply_migrations`, `plugin_mark` |
+| Source this       | What it gives                                                                 |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `lib/payload.sh`  | `hook_field`, which reads a key in either spelling, whichever harness sent it |
+| `lib/say.sh`      | `hook_say` and `hook_say_aloud`, the one answer shape every client reads      |
+| `lib/reply.sh`    | `hook_last_reply`, out of the payload or out of a transcript                  |
+| `lib/notes.sh`    | `stop_note_record` and `stop_note_take`, in a directory this plugin owns      |
+| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set`, `settings_from_project`      |
+| `lib/state.sh`    | `installed_version`, `apply_migrations`, `plugin_mark`                        |
 
 Each of those is a directory beside it with one function to a file, so
 `setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it
@@ -99,18 +154,39 @@ needs, so sourcing `notes.sh` gets you `settings.sh` and `state.sh` as well.
 
 ## Which clients it knows
 
-| Client | Harness |
-| --- | --- |
-| Claude Code, on your machine | `claude` |
-| ZCode | `claude` |
-| Claude Chat | `claude` |
-| Claude Cowork | `claude` |
-| Claude Code, in the cloud | `claude-code-cloud` |
-| Codex | `codex` |
-| Pi | `pi` |
+| Client                       | Harness             |
+| ---------------------------- | ------------------- |
+| Claude Code, on your machine | `claude`            |
+| ZCode                        | `claude`            |
+| Claude Chat                  | `claude`            |
+| Claude Cowork                | `claude`            |
+| Claude Code, in the cloud    | `claude-code-cloud` |
+| Codex                        | `codex`             |
+| Pi                           | `pi`                |
 
 A page any of them ships is the SDK's. Put a file of the same name under your
 plugin's `clients/<client>/` and yours is used instead.
+
+</details>
+
+2. Clone `ai-plugin-sdk`, and run it in your plugin's directory:
+
+```
+    git clone https://github.com/justinkek/ai-plugin-sdk
+    cd <path to your-plugin>
+    <path to ai-plugin-sdk>/build
+```
+
+`ai-plugin-sdk` reads `your-plugin/plugin.json` and writes to:
+
+- `your-plugin/distributions/`
+- `your-plugin/INSTALL.md`
+
+3. Commit both files so that agents can easily install your plugin.
+
+## Plugins built with `ai-plugin-sdk`
+
+- [unsolicited-text](https://github.com/justinkek/unsolicited-text)
 
 ## Tests
 
