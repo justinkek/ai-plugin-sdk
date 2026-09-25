@@ -22,8 +22,18 @@ client_runs() {
 
 plugin_has_hooks() { [ "$(jq '[.hooks[]?[]] | length' "$manifest")" -gt 0 ]; }
 
+# Whether a client runs everything the SDK can give it. Nothing here asks about
+# a plugin, so the SDK's own page and a plugin's page read the same rule.
+client_supports_everything() {
+  local client="$1"
+  [ "$(client_runs "$client" .runs.hooks)" = "true" ] || return 1
+  [ "$(client_runs "$client" .runs.skills)" = "true" ] || return 1
+  [ "$(client_runs "$client" .runs.settings)" != "none" ] || return 1
+  return 0
+}
+
 # Supported when everything this plugin has reaches a session. Partial when some
-# of it does.
+# of it does. A plugin with no hooks is not held to a client that runs none.
 supported_on() {
   local client="$1"
   if [ "$(client_runs "$client" .runs.hooks)" != "true" ] && plugin_has_hooks; then
