@@ -5,7 +5,7 @@
 (audience: humans)
 
 - Create plugins for Claude, Codex, Pi, etc. from a single source.
-- Comes with specific install/update/uninstall/settings instructions for each client, so you can focus on
+- Comes with specific install/update/uninstall/settings instructions for each client, so you can focus on features, not harness infrastructure.
 
 <details>
 <summary>Supported clients</summary>
