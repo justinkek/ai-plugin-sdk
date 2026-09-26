@@ -79,8 +79,8 @@ and by the settings skill, so a key you declare is a key a person is offered.
 `session_start`, `prompt`, `before_tool`, `after_tool`, `permission_request`,
 `stop`, `compact`, `after_compact`, `session_end`, `subagent_start`,
 `subagent_stop` and `interrupt`. The build writes each client's own name for
-it. A plugin that names events the way Claude Code does, `SessionStart`, is
-read as it is.
+it. A client's own event name, such as `SessionStart`, is refused, and the
+build says which common name to use.
 
 A script can be a name, or an object with an `on` list of what it runs for. On
 `before_tool`, `after_tool` and `permission_request` the list names tool calls

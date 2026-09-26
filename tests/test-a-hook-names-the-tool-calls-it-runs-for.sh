@@ -89,4 +89,16 @@ jq '.hooks.before_every_thing = ["hello.sh"]' "$fixture/plugin.json" > "$WORK/pl
 [ "$?" != "0" ]
 assert "a misspelt event is refused" "$?" "it built a registration nothing fires"
 
+printf "\nTest group: a client's own event name is refused, with the common one to use\n"
+
+jq 'del(.hooks.before_every_thing) | .hooks.SessionStart = ["hello.sh"]' "$fixture/plugin.json" > "$WORK/plugin.json.new" \
+  && mv "$WORK/plugin.json.new" "$fixture/plugin.json"
+said="$("$SDK/build" "$fixture" "$WORK/refused-claude" "$WORK/refused-claude.md" 2>&1 >/dev/null)"
+status="$?"
+[ "$status" != "0" ]
+assert "SessionStart as a key stops the build" "$?" "it built, so there are two ways to name the same event"
+
+printf '%s' "$said" | grep --quiet --fixed-strings 'SessionStart is session_start'
+assert "and the build names session_start in its place" "$?" "it said '$said'"
+
 counted

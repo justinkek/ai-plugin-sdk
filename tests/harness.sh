@@ -21,12 +21,12 @@ trap 'rm -rf "$WORK"' EXIT
 
 # The hooks the manifest declares, read the way the build reads them: each
 # event under the name a registration carries, holding script names. A plugin
-# can name events by their common names and hooks as objects with an `on`
-# list; this is the one shape every test reads.
+# names events by their common names and can name hooks as objects with an
+# `on` list; this is the one shape every test reads.
 DECLARED="$WORK/declared.json"
 jq --slurpfile events "$SDK/builder/events.json" '
   .hooks = ((.hooks // {}) | with_entries(
-    .key |= ($events[0].events[.] // .)
+    .key |= $events[0].events[.]
     | .value |= map(if type == "object" then .script else . end)))
 ' "$MANIFEST" > "$DECLARED"
 

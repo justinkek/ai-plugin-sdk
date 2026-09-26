@@ -16,11 +16,11 @@
 		"rules"
 	],
 	"hooks": {
-		"SessionStart": [
+		"session_start": [
 			"say-the-rule.sh"
 		],
-		"UserPromptSubmit": [],
-		"Stop": [
+		"prompt": [],
+		"stop": [
 			"note-a-long-reply.sh"
 		]
 	},
