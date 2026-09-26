@@ -15,5 +15,6 @@
 	],
 	"serves": [
 		"claude-code-cloud"
-	]
+	],
+	"tools": "claude"
 }

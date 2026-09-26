@@ -45,7 +45,7 @@ jq --null-input --tab \
   + {
     "ai-plugin-sdk": { version: $sdk },
     ships: ["rules"],
-    hooks: { SessionStart: ["say-the-rule.sh"] },
+    hooks: { session_start: ["say-the-rule.sh"] },
     settings: {
       LINE_CEILING: {
         kind: "count",

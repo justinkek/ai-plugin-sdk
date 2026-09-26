@@ -64,6 +64,9 @@ silencing a warning is a decision, so it is written down.
 | what a hook script can call | `lib/<subject>/<function>.sh`, named by the file it is in |
 | what sourcing one subject pulls in | `lib/<subject>.sh`, which names its parts and defines nothing |
 | how a harness is told about a hook | `harnesses/<harness>/harness.json` |
+| the common name of an event, and the name a registration carries | `builder/events.json` |
+| a client's tool names for each kind, and whether it filters on input | `builder/tools/<family>.json`, named by `tools` in `harness.json` |
+| how a client's tool call is read as entries | `builder/tools/<family>.sh`, copied into that distribution alone |
 | what a harness carries besides the registration | a file under `harnesses/<harness>/` |
 | the steps for one client | `clients/<client>/<page>.md` |
 | what one of the four skills says | `skills/<name>/body.md` |

@@ -14,5 +14,6 @@
 		"zcode",
 		"claude-chat",
 		"claude-cowork"
-	]
+	],
+	"tools": "claude"
 }

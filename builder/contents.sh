@@ -35,6 +35,13 @@ plugin_manifest_sh() {
   case_function plugin_setting_values \
     'to_entries[] | select(.value.values) | "    \(.key)) printf %s \((.value.values | join(" ")) | @sh) ;;"'
 
+  # Which tool calls, or which of an event's own values, each hook asked for in
+  # its `on` list. A hook with none is not named, and wants everything.
+  printf '\nplugin_hook_on() {\n  case "$1" in\n'
+  jq --raw-output '(.hook_on // {}) | to_entries[]
+    | "    \(.key | @sh)) printf '"'"'%s\\n'"'"' \(.value | map(@sh) | join(" ")) ;;"' "$manifest"
+  printf '  esac\n}\n'
+
   # What this plugin prints at the start of a session, for the SDK's own hook
   # that prints it again on a client that never carried it.
   # A function with an empty body is a syntax error, and a plugin with no
@@ -79,6 +86,15 @@ hooks() {
   done
 }
 
+# The code that reads a tool call as entries, for the one client family this
+# distribution serves and no other.
+tool_reader() {
+  local harness="$1" target="$2" family
+  family="$(harness_says "$harness" .tools)"
+  [ -n "$family" ] && [ -f "$sdk/builder/tools/$family.sh" ] || return 0
+  cp "$sdk/builder/tools/$family.sh" "$target/hooks/lib/tool/tool_entries_read.sh"
+}
+
 # Whatever else the plugin says it ships: its rules, its templates, its data.
 shipped() {
   local target="$1" folder
@@ -102,9 +118,9 @@ setting_writer() {
 contents() {
   local harness="$1" target="$2"
   mkdir -p "$target"
-  cp "$manifest" "$target/plugin.json"
+  cp "$source_manifest" "$target/plugin.json"
 
-  if ships "$harness" hooks; then hooks "$target"; setting_writer "$target"; fi
+  if ships "$harness" hooks; then hooks "$target"; tool_reader "$harness" "$target"; setting_writer "$target"; fi
   shipped "$target"
   if ships "$harness" skills; then skills "$harness" "$target"; fi
 }

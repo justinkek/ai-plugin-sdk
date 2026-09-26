@@ -11,6 +11,40 @@
 manifest="$plugin/plugin.json"
 [ -f "$manifest" ] || { printf 'no plugin.json in %s\n' "$plugin" >&2; exit 1; }
 
+# plugin.json names each hook under a common event name, and a hook can be an
+# object with an `on` list saying which tool calls, or which of the event's own
+# values, it runs for:
+#
+#   "before_tool": [ { "script": "guard.sh", "on": ["bash(git *)", "edit(*.sh)"] } ]
+#
+# Everything after this reads one shape: each event under the name the
+# registrations carry, holding script names, with the `on` lists kept aside in
+# hook_on. A client's own event name is refused, with the common one to use,
+# so there is one way to write a manifest.
+source_manifest="$manifest"
+unknown_events="$(jq --raw-output --slurpfile events "$sdk/builder/events.json" '
+  $events[0].events as $names
+  | (.hooks // {}) | keys[] | select($names[.] == null) | . as $key
+  | ($names | to_entries | map(select(.value == $key)) | first | .key) as $common
+  | if $common then "\($key) is \($common)" else $key end
+' "$source_manifest")"
+if [ -n "$unknown_events" ]; then
+  printf 'plugin.json names hooks under events the SDK does not know:\n\n' >&2
+  printf '  %s\n' "$unknown_events" >&2
+  printf '\nName each by its common name. The ones it knows are in builder/events.json.\n' >&2
+  exit 1
+fi
+manifest="$(mktemp)"
+trap 'rm -f "$manifest"' EXIT
+jq --slurpfile events "$sdk/builder/events.json" '
+  $events[0].events as $names
+  | .hook_on = ([(.hooks // {}) | to_entries[] | .value[]?
+      | select(type == "object" and ((.on // []) | length) > 0) | {key: .script, value: .on}] | from_entries)
+  | .hooks = ((.hooks // {}) | with_entries(
+      .key |= $names[.]
+      | .value |= map(if type == "object" then .script else . end)))
+' "$source_manifest" > "$manifest"
+
 says() { jq --raw-output "$1 // empty" "$manifest"; }
 
 name="$(says .name)"

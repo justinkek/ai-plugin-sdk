@@ -46,9 +46,9 @@ your-plugin
   "ai-plugin-sdk": { "version": "0.6.1" },
   "ships": ["rules"],
   "hooks": {
-    "SessionStart": ["say-the-rule.sh"],
-    "UserPromptSubmit": ["replay-notes.sh"],
-    "Stop": ["note-a-long-reply.sh"]
+    "session_start": [{ "script": "say-the-rule.sh", "on": ["startup", "resume"] }],
+    "before_tool": [{ "script": "guard.sh", "on": ["bash(git *)", "edit(*.sh)"] }],
+    "stop": ["note-a-long-reply.sh"]
   },
   "settings": {
     "LINE_CEILING": {
@@ -72,6 +72,50 @@ SDK knows, minus any it could not reach - a client running neither hooks nor
 skills. Name it only to narrow that. `hooks` is read by every harness: each one registers those
 scripts the way it wants to be told. `settings` is read by the settings library
 and by the settings skill, so a key you declare is a key a person is offered.
+
+## Naming hooks
+
+`hooks` names each script under an event, by the same name on every client:
+`session_start`, `prompt`, `before_tool`, `after_tool`, `permission_request`,
+`stop`, `compact`, `after_compact`, `session_end`, `subagent_start`,
+`subagent_stop` and `interrupt`. The build writes each client's own name for
+it. A client's own event name, such as `SessionStart`, is refused, and the
+build says which common name to use.
+
+A script can be a name, or an object with an `on` list of what it runs for. On
+`before_tool`, `after_tool` and `permission_request` the list names tool calls
+by kind, each with an optional pattern in brackets. On every other event it
+names the event's own values, such as `startup` and `resume`.
+
+| Kind | The pattern matches |
+| --- | --- |
+| `bash`, `powershell` | the command, each subcommand on its own, as Claude Code matches `Bash(git *)` |
+| `read`, `write`, `edit`, `multi_edit`, `notebook_edit`, `delete`, `move` | the file |
+| `grep`, `glob`, `list` | the search pattern |
+| `web_fetch`, `web_search` | the URL, or the query |
+| `agent` | the prompt |
+| `mcp` | the tool's name |
+
+Each client's tool names for each kind are in `builder/tools/`. Where a client
+filters on the tool input, the pattern becomes its own filter; where it does
+not, the hook is called for every call of that kind, and `tool_entries` hands
+it only the ones its `on` list asked for:
+
+```bash
+payload="$(cat)"
+. "$(dirname "$0")/lib/tool.sh"
+. "$(dirname "$0")/lib/permission.sh"
+while IFS= read -r entry; do
+  file="$(jq --raw-output .file <<< "$entry")"
+  added="$(jq --raw-output .added <<< "$entry")"
+  # ...decide, then refuse with: hook_permission deny "why"
+done < <(tool_entries "$payload")
+```
+
+Every entry has the same fields on every client: `kind`, `tool`, `file`,
+`command`, `added`, `removed`, `pattern`, `url`, `query` and `prompt`. One call
+can be several entries: a Codex patch that adds one file and changes another
+is two.
 
 A setting has a `kind`: `count`, `switch`, `choice` (with `values`), or `text`.
 A value the kind does not take is refused and the default stands, because a
@@ -100,6 +144,7 @@ Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 | `lib/settings.sh`   | `setting_value`, `setting_on`, `setting_is_set`, `settings_from_project`      |
 | `lib/state.sh`      | `installed_version`, `apply_migrations`, `plugin_mark`                        |
 | `lib/permission.sh` | `hook_permission`, a deny, ask or allow on the tool call a hook was handed    |
+| `lib/tool.sh`       | `tool_entries`, the tool call a hook was handed, the same on every client     |
 
 Each of those is a directory beside it with one function to a file, so
 `setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it

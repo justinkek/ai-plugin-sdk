@@ -1,0 +1,18 @@
+{
+	"says": "The common name a plugin gives each event, and the name the registration carries. Every harness that registers hooks names them the same way, so one column does; the Pi extension answers to these names too.",
+	"events": {
+		"session_start": "SessionStart",
+		"prompt": "UserPromptSubmit",
+		"before_tool": "PreToolUse",
+		"after_tool": "PostToolUse",
+		"permission_request": "PermissionRequest",
+		"stop": "Stop",
+		"compact": "PreCompact",
+		"after_compact": "PostCompact",
+		"session_end": "SessionEnd",
+		"subagent_start": "SubagentStart",
+		"subagent_stop": "SubagentStop",
+		"interrupt": "Interrupt"
+	},
+	"tool_events": ["before_tool", "after_tool", "permission_request"]
+}

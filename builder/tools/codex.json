@@ -1,0 +1,22 @@
+{
+	"says": "Each common tool kind, and the tools that carry it on Codex. Codex filters on the tool name alone, so every pattern is checked by the hook. One apply_patch call can write, edit, delete and move files at once.",
+	"filters_input": false,
+	"kinds": {
+		"bash": { "tools": ["Bash"] },
+		"powershell": { "tools": ["Bash"] },
+		"read": { "tools": ["Bash"] },
+		"write": { "tools": ["apply_patch"] },
+		"edit": { "tools": ["apply_patch"] },
+		"multi_edit": { "tools": ["apply_patch"] },
+		"notebook_edit": { "tools": ["apply_patch"] },
+		"delete": { "tools": ["apply_patch"] },
+		"move": { "tools": ["apply_patch"] },
+		"grep": { "tools": ["Bash"] },
+		"glob": { "tools": ["Bash"] },
+		"list": { "tools": ["Bash"] },
+		"web_fetch": { "tools": ["web\\.?run"] },
+		"web_search": { "tools": ["web\\.?run"] },
+		"agent": { "tools": ["collaboration\\.?spawn_agent"] },
+		"mcp": { "tools": ["mcp__.*"] }
+	}
+}
