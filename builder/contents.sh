@@ -5,8 +5,7 @@
 # shellcheck disable=SC2154
 
 # What an install copies out of a distribution folder: the hooks and the
-# libraries beside them, whatever else the plugin ships, the skills, and the
-# commands.
+# libraries beside them, whatever else the plugin ships, and the skills.
 
 # One case arm per setting, so a hook reads a default, a kind or a list of
 # allowed values without jq.
@@ -90,14 +89,6 @@ shipped() {
   done
 }
 
-commands() {
-  local target="$1" source
-  mkdir -p "$target/commands"
-  for source in "$sdk"/commands/*.md; do
-    filled < "$source" > "$target/commands/$(basename "$source")"
-  done
-}
-
 # The script the settings skill runs to write one setting. It reads the
 # libraries beside the hooks, so it goes where they do and nowhere else. The
 # settings every plugin gets count, so a plugin declaring none of its own still
@@ -116,5 +107,4 @@ contents() {
   if ships "$harness" hooks; then hooks "$target"; setting_writer "$target"; fi
   shipped "$target"
   if ships "$harness" skills; then skills "$harness" "$target"; fi
-  if ships "$harness" commands; then commands "$target"; fi
 }

@@ -15,7 +15,7 @@ A cloud session resolves no marketplace, so the marketplace install does not wor
         printf '{}' | {{root}}/hooks/{{session-start}}
 
 4. The skills are on disk as soon as the script finishes, and an agent follows one by reading it at `{{root}}/skills/<name>/SKILL.md`. Nothing waits on the menu.
-5. Run `/reload-skills` when you want them listed in the menu. `/reload-plugins` does not work over a remote connection, and this install method adds no plugin. The `/{{name}}-settings` and `/{{name}}-update` entries arrive on their own a moment later.
+5. Run `/reload-skills` when you want them listed in the menu, as `/{{name}}-settings`, `/{{name}}-update` and the rest. Each skill carries the plugin's name, so a second plugin built the same way never overwrites it. `/reload-plugins` does not work over a remote connection, and this install method adds no plugin.
 
 The container takes all of it away when the session ends.
 

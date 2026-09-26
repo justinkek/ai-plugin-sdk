@@ -29,11 +29,10 @@ printf "\nTest group: every folder holds what its harness declares, and nothing 
 
 for distribution in $(distributions); do
   declared="$SDK/harnesses/$distribution/harness.json"
-  for part in hooks skills commands; do
+  for part in hooks skills; do
     case "$part" in
       hooks) held="hooks/lib/settings.sh" ;;
       skills) held="skills/update/SKILL.md" ;;
-      commands) held="commands/update.md" ;;
     esac
 
     if jq --exit-status --arg part "$part" '.ships | index($part)' "$declared" >/dev/null; then

@@ -56,14 +56,11 @@ assert "and a hook of theirs is registered once" "$?" "the install dropped it or
 [ "$(registered)" = "$((declared + 1))" ]
 assert "beside this plugin's $declared" "$?" "it registered $(registered)"
 
-printf "\nTest group: the skills and commands land where the client looks\n"
+printf "\nTest group: the skills land where the client looks\n"
 
-[ -f "$HOME_DIR/.claude/skills/update/SKILL.md" ]
-assert "the skills are under ~/.claude/skills" "$?" "a session finds no skill to follow"
-
-[ -f "$HOME_DIR/.claude/commands/$NAME-update.md" ]
-assert "the commands carry the plugin's name" "$?" \
-  "a command and a skill of the same name both answer to it, and the command wins"
+[ -f "$HOME_DIR/.claude/skills/$NAME-update/SKILL.md" ]
+assert "the skills are under ~/.claude/skills, carrying the plugin's name" "$?" \
+  "a session finds no skill to follow"
 
 printf "\nTest group: an unreadable settings file is kept rather than lost\n"
 
