@@ -61,9 +61,13 @@ named_harness() {
 # nothing otherwise.
 registration() {
   local harness="$1" root="$2"
+  # An event the harness runs a script of its own for is registered whether or
+  # not the plugin has a hook there too, so the cloud refresh still runs for a
+  # plugin with no session start hook of its own.
   effective_hooks \
     | jq --tab --arg root "$root" --slurpfile harness "$sdk/harnesses/$harness/harness.json" '
-    {hooks: (to_entries | map({
+    (($harness[0].own // {}) | map_values([])) + .
+    | {hooks: (to_entries | map({
       key: .key,
       value: [ { hooks:
         ((($harness[0].own[.key] // []) | map({type: "command", command: ("bash \"" + $root + "/" + . + "\"")}))

@@ -1,6 +1,6 @@
 {
 	"name": "ai-plugin-sdk",
-	"version": "0.6.6",
+	"version": "0.6.7",
 	"description": "Write a plugin once, install it on every client.",
 	"license": "MIT",
 	"author": {

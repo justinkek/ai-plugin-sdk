@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# A decision on the tool call a hook was handed, and the reason a person is
+# shown. A decision that is none of the three is read as deny: a guard that
+# cannot say what it meant has not let anything through.
+hook_permission() {
+  local decision="$1" reason
+  case "$decision" in
+    deny | ask | allow) ;;
+    *) decision="deny" ;;
+  esac
+  reason="$(printf '%s' "$2" | hook_escaped)"
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' \
+    "$decision" "$reason"
+}

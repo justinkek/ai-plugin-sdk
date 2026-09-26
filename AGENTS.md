@@ -146,6 +146,8 @@ Each of these was a real failure on a real client, and something here holds it:
 | a cloud install must merge rather than append | `harnesses/claude-code-cloud/merge-settings.sh` |
 | two plugins must not drain each other's notes | `lib/notes.sh`, under the plugin's own home |
 | a shell too old fails with a sentence, not a syntax error | `lib/shell.sh`, sourced by both roots of the graph |
+| across plugins, a deny on a tool call outranks an allow | `lib/permission.sh`, and the Pi extension's `tool_call`, which merges through it |
+| a plugin may register no session start hook at all | `builder/contents.sh` writes a function body that is never empty, and `registration` in `builder/harnesses.sh` keeps a harness's own hooks |
 
 ## Writing
 
