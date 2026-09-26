@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# Lays down a plugin the build can build, so nobody copies the structure out of
+# the README by hand.
+#
+#   ai-plugin-sdk/new-plugin <directory> [owner/repository]
+#
+# It writes the manifest, one session start hook and the rule that hook prints.
+# Everything else a plugin has - the skills, the pages, the registrations - the
+# build writes, so there is nothing here to keep in step with the SDK.
+
+set -e
+
+sdk="$(cd "$(dirname "$0")" && pwd)"
+where="${1:-}"
+repository="${2:-}"
+
+[ -n "$where" ] || {
+  printf 'usage: new-plugin <directory> [owner/repository]\n' >&2
+  exit 2
+}
+
+[ -e "$where/plugin.json" ] && {
+  printf '%s already holds a plugin.json.\n' "$where" >&2
+  exit 1
+}
+
+name="$(basename "$where")"
+prefix="$(printf '%s' "$name" | tr '[:lower:]-' '[:upper:]_')"
+sdk_version="$(jq --raw-output '.version' "$sdk/package.json")"
+
+mkdir -p "$where/hooks" "$where/rules"
+
+jq --null-input --tab \
+  --arg name "$name" \
+  --arg sdk "$sdk_version" \
+  --arg repository "$repository" '
+  {
+    name: $name,
+    version: "0.1.0",
+    description: "What it is for.",
+    license: "MIT"
+  }
+  + (if $repository == "" then {} else { repository: $repository } end)
+  + {
+    "ai-plugin-sdk": { version: $sdk },
+    ships: ["rules"],
+    hooks: { SessionStart: ["say-the-rule.sh"] },
+    settings: {
+      LINE_CEILING: {
+        kind: "count",
+        default: "8",
+        says: "the most lines a reply may hold"
+      }
+    }
+  }' > "$where/plugin.json"
+
+cat > "$where/rules/reply-shape.md" <<'RULE'
+# Reply shape
+
+Keep a reply to at most {ceiling} lines. Where it would run longer, send a
+table or a fenced block instead: neither is counted.
+RULE
+
+cat > "$where/hooks/say-the-rule.sh" <<'HOOK'
+#!/usr/bin/env bash
+
+# What a session is given at its start: the rule, with the ceiling the settings
+# ask for written into it.
+payload="$(cat)"
+
+. "$(dirname "$0")/lib/say.sh"
+
+sed "s/{ceiling}/$(setting_value LINE_CEILING)/" "$PLUGIN_ROOT/rules/reply-shape.md" \
+  | hook_say "$(hook_event_of "$payload")"
+HOOK
+chmod +x "$where/hooks/say-the-rule.sh"
+
+printf '%s is ready. Build it:\n\n' "$name"
+printf '    %s/build %s\n\n' "$sdk" "$where"
+printf 'Then commit distributions/, INSTALL.md and COMPATIBILITY.md: an install\n'
+printf 'fetches files from your repository, so what is committed is what a person\n'
+printf 'gets.\n\n'
+printf 'Its one setting is %s_LINE_CEILING. Its one hook prints rules/reply-shape.md\n' "$prefix"
+printf 'at the start of a session.\n'
+[ -n "$repository" ] || {
+  printf '\nplugin.json names no repository. Add one to be told when a newer version\n'
+  printf 'of your plugin is published.\n'
+}

@@ -1,30 +1,28 @@
 # ai-plugin-sdk
 
+<h2 align="center">write once, plugin anywhere</h2>
+
 (audience: humans)
 
-A plugin that prints something into a session, refuses an edit against a rule,
-or carries a note to the next prompt has to be installed somewhere. Doing that
-by hand for seven clients costs more than the plugin does.
+- Create plugins for Claude, Codex, Pi, etc. from a single source.
+- Comes with specific install/update/uninstall/settings instructions for each client, so you can focus on features, not harness infrastructure.
 
-This is the part that is the same every time. You write a manifest, some hook
-scripts and whatever your plugin is for. The SDK writes the folders each client
-installs from: the hook registrations, the marketplace manifests, the install,
-update, uninstall and settings pages, and the four skills that run them.
+See [supported clients](COMPATIBILITY.md).
 
-## Using it
+## Getting started
 
-Clone it, and run it in your plugin's directory:
+1. Clone the SDK and make a plugin with it:
 
-    git clone https://github.com/justinkek/ai-plugin-sdk
-    path/to/ai-plugin-sdk/build
+```
+git clone https://github.com/justinkek/ai-plugin-sdk
+ai-plugin-sdk/new-plugin your-plugin you/your-plugin
+```
 
-It reads `plugin.json` and writes `distributions/`, one folder per harness,
-plus `INSTALL.md`. Commit both: an install fetches files from your repository,
-so what is committed is what a person gets.
+That writes the manifest, one session start hook and the rule it prints. The
+rest of the structure is yours to add as you need it:
 
-## What a plugin holds
-
-    any-plugin
+```
+your-plugin
     ├── plugin.json     name, version, clients, hooks by event, settings and defaults
     ├── hooks/          its own scripts, sourcing lib/ beside them
     ├── rules/          whatever it puts into a session, if anything
@@ -33,10 +31,13 @@ so what is committed is what a person gets.
     ├── install-page/   the prose around the install table
     ├── distributions/  generated, committed
     └── tests/          its own behaviour only
+```
 
-## The manifest
+<details>
+<summary>Details</summary>
 
 ```json
+// plugin.json
 {
   "name": "example-plugin",
   "version": "0.1.0",
@@ -50,10 +51,16 @@ so what is committed is what a person gets.
     "Stop": ["note-a-long-reply.sh"]
   },
   "settings": {
-    "LINE_CEILING": { "kind": "count", "default": "8", "says": "the most lines a reply may hold" }
+    "LINE_CEILING": {
+      "kind": "count",
+      "default": "8",
+      "says": "the most lines a reply may hold"
+    }
   }
 }
 ```
+
+## The manifest
 
 `ai-plugin-sdk.version` is the oldest SDK that can build this plugin. A build
 from an older copy stops and says so rather than writing folders by rules it
@@ -71,19 +78,28 @@ A value the kind does not take is refused and the default stands, because a
 hook that reads a value it has no rule for is worse than one reading the
 default. `{state}` and `{home}` in a default are filled in at run time.
 
+A setting is read from the environment first, then from the project's own
+`.<name>/settings`, then from the person's `~/.<name>/settings`, then the
+default. The project's file is the nearest one at or above the directory the
+hook runs in, and a hook that has a payload can name that directory outright:
+
+```bash
+settings_from_project "$(hook_field "$payload" cwd)"
+```
+
 ## What a hook can read
 
 Every hook script gets `hooks/lib/` beside it. Source the subject you need:
 
-| Source this | What it gives |
-| --- | --- |
-| `lib/payload.sh` | `hook_field`, which reads a key in either spelling, whichever harness sent it |
-| `lib/say.sh` | `hook_say` and `hook_say_aloud`, the one answer shape every client reads |
-| `lib/reply.sh` | `hook_last_reply`, out of the payload or out of a transcript |
-| `lib/notes.sh` | `stop_note_record` and `stop_note_take`, in a directory this plugin owns |
-| `lib/settings.sh` | `setting_value`, `setting_on`, `setting_is_set` |
-| `lib/state.sh` | `installed_version`, `apply_migrations`, `plugin_mark` |
-| `lib/permission.sh` | `hook_permission`, a deny, ask or allow on the tool call a hook was handed |
+| Source this         | What it gives                                                                 |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `lib/payload.sh`    | `hook_field`, which reads a key in either spelling, whichever harness sent it |
+| `lib/say.sh`        | `hook_say` and `hook_say_aloud`, the one answer shape every client reads      |
+| `lib/reply.sh`      | `hook_last_reply`, out of the payload or out of a transcript                  |
+| `lib/notes.sh`      | `stop_note_record` and `stop_note_take`, in a directory this plugin owns      |
+| `lib/settings.sh`   | `setting_value`, `setting_on`, `setting_is_set`, `settings_from_project`      |
+| `lib/state.sh`      | `installed_version`, `apply_migrations`, `plugin_mark`                        |
+| `lib/permission.sh` | `hook_permission`, a deny, ask or allow on the tool call a hook was handed    |
 
 Each of those is a directory beside it with one function to a file, so
 `setting_value` is in `lib/settings/setting_value.sh`. A subject sources what it
@@ -99,18 +115,40 @@ the hooks, and `strongest_permission` in `lib/permission.sh` is the merge.
 
 ## Which clients it knows
 
-| Client | Harness |
-| --- | --- |
-| Claude Code, on your machine | `claude` |
-| ZCode | `claude` |
-| Claude Chat | `claude` |
-| Claude Cowork | `claude` |
-| Claude Code, in the cloud | `claude-code-cloud` |
-| Codex | `codex` |
-| Pi | `pi` |
+| Client                       | Harness             |
+| ---------------------------- | ------------------- |
+| Claude Code, on your machine | `claude`            |
+| ZCode                        | `claude`            |
+| Claude Chat                  | `claude`            |
+| Claude Cowork                | `claude`            |
+| Claude Code, in the cloud    | `claude-code-cloud` |
+| Codex                        | `codex`             |
+| Pi                           | `pi`                |
 
 A page any of them ships is the SDK's. Put a file of the same name under your
 plugin's `clients/<client>/` and yours is used instead.
+
+</details>
+
+2. Build it, whenever the manifest or a hook changes:
+
+```
+ai-plugin-sdk/build your-plugin
+```
+
+It reads `your-plugin/plugin.json` and writes:
+
+- `your-plugin/distributions/` - one folder per harness, what an install copies
+- `your-plugin/INSTALL.md` - how to install it, per client
+- `your-plugin/COMPATIBILITY.md` - where it can be installed, and what reaches
+  a session there
+
+3. Commit all three. An install fetches files from your repository, so what is
+   committed is what a person gets.
+
+## Plugins built with `ai-plugin-sdk`
+
+- [unsolicited-text](https://github.com/justinkek/unsolicited-text)
 
 ## Tests
 

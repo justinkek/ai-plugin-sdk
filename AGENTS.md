@@ -20,9 +20,10 @@ branch points at is what it gets. Trunk-based: short branches,
 merged often, and every one of them raises the version in `package.json`.
 
 CI fails a pull request whose version matches its base, or whose version went
-backwards. Run it yourself with `tests/version-changed`. It is not in
-`tests/run-tests`, because a branch is allowed to be mid-change; the merge is
-what has to carry the bump.
+backwards. A branch that changes only files no install receives - the README,
+the tests, the example plugin - needs no new version. Run it yourself with
+`tests/version-changed`. It is not in `tests/run-tests`, because a branch is
+allowed to be mid-change; the merge is what has to carry the bump.
 
 Which digit moves is one question: **would a plugin built against the last
 version break on this one?**

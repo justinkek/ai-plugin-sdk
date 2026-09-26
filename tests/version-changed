@@ -20,6 +20,37 @@ version_in() { git -C "$sdk" show "$1:package.json" 2>/dev/null | jq --raw-outpu
 was="$(version_in "$base")"
 now="$(jq --raw-output '.version' "$sdk/package.json")"
 
+# The paths an install ever receives: whatever the build reads, plus the build
+# and the file holding the version. A change to anything else - the README, the
+# tests, the example plugin - reaches nobody, so it asks for no new version.
+build_reads() {
+  printf 'build\npackage.json\n'
+  grep --recursive --only-matching --extended-regexp '\$sdk"?/[a-zA-Z.-]+' \
+    "$sdk/build" "$sdk/builder" | sed -e 's/^[^:]*://' -e 's/\$sdk"\?\///' | sort --unique
+}
+
+changed_files() {
+  git -C "$sdk" diff --name-only "$base...HEAD" 2>/dev/null \
+    || git -C "$sdk" diff --name-only "$base" HEAD
+}
+
+# Whether this branch touches any of them.
+touches_what_ships() {
+  local path shipped
+  while read -r path; do
+    [ -n "$path" ] || continue
+    while read -r shipped; do
+      [ -n "$shipped" ] || continue
+      case "$path" in "$shipped" | "$shipped"/*) return 0 ;; esac
+    done <<SHIPPED
+$(build_reads)
+SHIPPED
+  done <<CHANGED
+$(changed_files)
+CHANGED
+  return 1
+}
+
 if [ -z "$was" ]; then
   printf 'no package.json on %s to compare against, so nothing to check\n' "$base"
   exit 0
@@ -34,6 +65,11 @@ if [ "$was" != "$now" ] && [ "$(newest "$was" "$now")" != "$now" ]; then
   printf 'An install caches by version, so a number somebody already has is a\n' >&2
   printf 'number that reaches nobody. Raise it instead.\n' >&2
   exit 1
+fi
+
+if [ "$was" = "$now" ] && ! touches_what_ships; then
+  printf 'the version is still %s, and nothing an install receives has changed.\n' "$now"
+  exit 0
 fi
 
 if [ "$was" = "$now" ]; then
