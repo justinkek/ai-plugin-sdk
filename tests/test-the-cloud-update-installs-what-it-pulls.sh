@@ -58,8 +58,6 @@ env HOME="$home" bash "$running/distributions/claude-code-cloud/install.sh" >/de
 mkdir -p "$work/distributions/claude-code-cloud/skills/newcomer"
 printf -- '---\nname: newcomer\ndescription: added by the new version\n---\n' \
   > "$work/distributions/claude-code-cloud/skills/newcomer/SKILL.md"
-printf -- '---\ndescription: added by the new version\n---\n\nInvoke it.\n' \
-  > "$work/distributions/claude-code-cloud/commands/newcomer.md"
 published 0.0.2
 
 said="$(printf '{}' | env HOME="$home" bash "$running/distributions/claude-code-cloud/refresh.sh" 2>/dev/null)"
@@ -71,11 +69,8 @@ assert "the update exits 0" "$?" "exited $status"
 printf '%s' "$said" | grep --quiet --fixed-strings '0.0.2 replaces 0.0.1'
 assert "it says which version replaces which" "$?" "it said '$said'"
 
-[ -f "$home/.claude/skills/newcomer/SKILL.md" ]
+[ -f "$home/.claude/skills/$NAME-newcomer/SKILL.md" ]
 assert "a skill the new version added is in place" "$?" \
   "it waits for the next session, and the update said it was done"
-
-[ -f "$home/.claude/commands/$NAME-newcomer.md" ]
-assert "so is a command it added" "$?" "the menu entry waits for the next session"
 
 counted

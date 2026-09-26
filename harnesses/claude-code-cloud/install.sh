@@ -1,12 +1,33 @@
 #!/usr/bin/env bash
 
 folder="$(cd "$(dirname "$0")" && pwd)"
+skills="$HOME/.claude/skills"
 
-mkdir -p "$HOME/.claude/skills" "$HOME/.claude/commands"
-cp -R "$folder/skills/." "$HOME/.claude/skills/"
+mkdir -p "$skills"
 
-for command in "$folder"/commands/*.md; do
-  cp "$command" "$HOME/.claude/commands/{{name}}-$(basename "$command")"
+# A cloud install adds no plugin, so nothing names its skills after it. Every
+# plugin built with this SDK has a skill called settings, and the second one
+# installed into a home would overwrite the first. Each skill takes the
+# plugin's name here, the way a plugin install would give it.
+for source in "$folder"/skills/*/; do
+  [ -f "$source/SKILL.md" ] || continue
+  named="{{name}}-$(basename "$source")"
+  rm -rf "${skills:?}/$named"
+  cp -R "$source." "$skills/$named/"
+  if [ "$(head -1 "$source/SKILL.md")" = "---" ]; then
+    sed "2,/^---\$/s/^name:.*/name: $named/" "$source/SKILL.md" > "$skills/$named/SKILL.md"
+  fi
+done
+
+# What an install before this one left behind: the SDK's skills under their
+# bare names, and a command beside each one. A bare skill is taken away only
+# when it says it was rendered from this plugin, since another plugin's may
+# sit under the same name.
+for bare in reload settings uninstall update; do
+  if grep --quiet --fixed-strings "Rendered from {{name}} " "$skills/$bare/SKILL.md" 2>/dev/null; then
+    rm -rf "${skills:?}/$bare"
+  fi
+  rm -f "$HOME/.claude/commands/{{name}}-$bare.md"
 done
 
 "$folder/merge-settings.sh" "$folder/settings.json" "$HOME/.claude/settings.json" "$folder"

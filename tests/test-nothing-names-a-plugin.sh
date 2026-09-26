@@ -8,7 +8,7 @@ printf "Test group: nothing the SDK ships names a plugin\n"
 
 named="$(grep --recursive --line-number --ignore-case \
   --extended-regexp 'unsolicited.text|example.plugin' \
-  "$SDK/build" "$SDK/builder" "$SDK/lib" "$SDK/clients" "$SDK/skills" "$SDK/commands" "$SDK/harnesses" 2>/dev/null || true)"
+  "$SDK/build" "$SDK/builder" "$SDK/lib" "$SDK/clients" "$SDK/skills" "$SDK/harnesses" 2>/dev/null || true)"
 
 [ -z "$named" ]
 printf '%s' "$named" | sed 's/^/        /'
@@ -19,7 +19,7 @@ printf "\nTest group: nothing the SDK ships hard-codes a prefix\n"
 
 # Every setting takes the plugin's own prefix, read out of the manifest.
 prefixed="$(grep --recursive --line-number --extended-regexp '\b[A-Z]+_[A-Z_]*(HOME|CEILING|QUEUE|NOTE)' \
-  "$SDK/lib" "$SDK/clients" "$SDK/skills" "$SDK/commands" 2>/dev/null \
+  "$SDK/lib" "$SDK/clients" "$SDK/skills" 2>/dev/null \
   | grep --invert-match 'PLUGIN_\|{{prefix}}\|<PREFIX>' || true)"
 
 [ -z "$prefixed" ]
