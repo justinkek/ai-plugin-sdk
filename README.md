@@ -11,7 +11,15 @@ See [supported clients](COMPATIBILITY.md).
 
 ## Getting started
 
-1. Ensure your plugin has the following structure, and add `plugin.json`
+1. Clone the SDK and make a plugin with it:
+
+```
+git clone https://github.com/justinkek/ai-plugin-sdk
+ai-plugin-sdk/new-plugin your-plugin you/your-plugin
+```
+
+That writes the manifest, one session start hook and the rule it prints. The
+rest of the structure is yours to add as you need it:
 
 ```
 your-plugin
@@ -113,20 +121,21 @@ plugin's `clients/<client>/` and yours is used instead.
 
 </details>
 
-2. Clone `ai-plugin-sdk`, and run it in your plugin's directory:
+2. Build it, whenever the manifest or a hook changes:
 
 ```
-    git clone https://github.com/justinkek/ai-plugin-sdk
-    cd <path to your-plugin>
-    <path to ai-plugin-sdk>/build
+ai-plugin-sdk/build your-plugin
 ```
 
-`ai-plugin-sdk` reads `your-plugin/plugin.json` and writes to:
+It reads `your-plugin/plugin.json` and writes:
 
-- `your-plugin/distributions/`
-- `your-plugin/INSTALL.md`
+- `your-plugin/distributions/` - one folder per harness, what an install copies
+- `your-plugin/INSTALL.md` - how to install it, per client
+- `your-plugin/COMPATIBILITY.md` - where it can be installed, and what reaches
+  a session there
 
-3. Commit both files so that agents can easily install your plugin.
+3. Commit all three. An install fetches files from your repository, so what is
+   committed is what a person gets.
 
 ## Plugins built with `ai-plugin-sdk`
 
