@@ -10,5 +10,6 @@
 	],
 	"serves": [
 		"codex"
-	]
+	],
+	"tools": "codex"
 }

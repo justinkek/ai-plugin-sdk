@@ -1,0 +1,22 @@
+{
+	"says": "Each common tool kind, and the tools that carry it on Claude Code, Cowork, ZCode and Claude Code in the cloud. `if` is the tool a pattern is written against in Claude's own filter; a tool with no `if` is filtered by the hook instead.",
+	"filters_input": true,
+	"kinds": {
+		"bash": { "tools": ["Bash", "mcp__remote-devices__device_bash"], "if": "Bash" },
+		"powershell": { "tools": ["PowerShell"], "if": "PowerShell" },
+		"read": { "tools": ["Read"], "if": "Read" },
+		"write": { "tools": ["Write"], "if": "Write" },
+		"edit": { "tools": ["Edit"], "if": "Edit" },
+		"multi_edit": { "tools": ["Edit", "MultiEdit"], "if": "Edit" },
+		"notebook_edit": { "tools": ["NotebookEdit"], "if": "NotebookEdit" },
+		"delete": { "tools": ["Bash"] },
+		"move": { "tools": ["Bash"] },
+		"grep": { "tools": ["Grep"], "if": "Grep" },
+		"glob": { "tools": ["Glob"], "if": "Glob" },
+		"list": { "tools": ["Glob"] },
+		"web_fetch": { "tools": ["WebFetch"], "if": "WebFetch" },
+		"web_search": { "tools": ["WebSearch"], "if": "WebSearch" },
+		"agent": { "tools": ["Agent"] },
+		"mcp": { "tools": ["mcp__.*"] }
+	}
+}
