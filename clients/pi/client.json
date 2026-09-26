@@ -2,6 +2,27 @@
 	"name": "Pi",
 	"runs": {
 		"hooks": true,
+		"events": [
+			"session_start",
+			"prompt",
+			"before_tool",
+			"stop"
+		],
+		"tool_kinds": [
+			"bash",
+			"read",
+			"write",
+			"edit",
+			"multi_edit",
+			"grep",
+			"glob",
+			"list"
+		],
+		"done_through": {
+			"delete": "bash",
+			"move": "bash",
+			"notebook_edit": "edit"
+		},
 		"skills": false,
 		"settings": "install"
 	},

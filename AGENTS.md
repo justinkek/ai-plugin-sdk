@@ -79,6 +79,7 @@ silencing a warning is a decision, so it is written down.
 | how a skill is rendered | `builder/skills.sh` |
 | what the manifest is read into | `builder/manifest.sh` |
 | what a client runs, and its caveat | `clients/<client>/client.json` |
+| which events a client fires, which tool kinds its hooks see, and which it does through another | `clients/<client>/client.json`, `runs.events`, `runs.tool_kinds` and `runs.done_through` |
 | which products exist and which have a client | `compatibility.json` |
 
 ## How the build is put together

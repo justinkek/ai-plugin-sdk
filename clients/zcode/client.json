@@ -2,6 +2,39 @@
 	"name": "ZCode",
 	"runs": {
 		"hooks": true,
+		"events": [
+			"session_start",
+			"prompt",
+			"before_tool",
+			"after_tool",
+			"permission_request",
+			"stop",
+			"compact",
+			"after_compact",
+			"session_end",
+			"subagent_start",
+			"subagent_stop"
+		],
+		"tool_kinds": [
+			"bash",
+			"read",
+			"write",
+			"edit",
+			"web_fetch",
+			"web_search",
+			"agent",
+			"mcp"
+		],
+		"done_through": {
+			"multi_edit": "edit",
+			"notebook_edit": "edit",
+			"delete": "bash",
+			"move": "bash",
+			"grep": "bash",
+			"glob": "bash",
+			"list": "bash",
+			"powershell": "bash"
+		},
 		"skills": true,
 		"settings": "install"
 	}

@@ -2,6 +2,40 @@
 	"name": "Codex",
 	"runs": {
 		"hooks": true,
+		"events": [
+			"session_start",
+			"prompt",
+			"before_tool",
+			"after_tool",
+			"permission_request",
+			"stop",
+			"compact",
+			"after_compact",
+			"session_end",
+			"subagent_start",
+			"subagent_stop",
+			"interrupt"
+		],
+		"tool_kinds": [
+			"bash",
+			"write",
+			"edit",
+			"multi_edit",
+			"delete",
+			"move",
+			"web_fetch",
+			"web_search",
+			"agent",
+			"mcp"
+		],
+		"done_through": {
+			"read": "bash",
+			"grep": "bash",
+			"glob": "bash",
+			"list": "bash",
+			"notebook_edit": "edit",
+			"powershell": "bash"
+		},
 		"skills": true,
 		"settings": "install"
 	},
