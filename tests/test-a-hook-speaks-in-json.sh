@@ -31,18 +31,18 @@ while read -r event script; do
   named="$(printf '%s' "$said" | carried | head -1)"
   [ "$named" = "$event" ]
   assert "and names $event, so a client knows what it is answering" "$?" "it named '$named'"
-done < <(jq --raw-output '.hooks | to_entries[] | .key as $event | .value[] | "\($event) \(.)"' "$MANIFEST")
+done < <(jq --raw-output '.hooks | to_entries[] | .key as $event | .value[] | "\($event) \(.)"' "$DECLARED")
 
 # A hook that guards a tool call has nothing to say to a payload naming no tool,
 # so only a plugin with something to print at session start must have spoken.
-if jq --exit-status '(.hooks.SessionStart // []) | length > 0' "$MANIFEST" >/dev/null; then
+if jq --exit-status '(.hooks.SessionStart // []) | length > 0' "$DECLARED" >/dev/null; then
   [ "$spoke" -gt 0 ]
   assert "at least one hook speaks at all" "$?" "no hook printed anything, so nothing reaches a session"
 fi
 
 printf "\nTest group: a hand run prints the text itself\n"
 
-for script in $(jq --raw-output '.hooks.SessionStart[]? // empty' "$MANIFEST"); do
+for script in $(jq --raw-output '.hooks.SessionStart[]? // empty' "$DECLARED"); do
   plain="$(printf '{}' | env "${PREFIX}_HOME=$WORK/home-plain" \
     bash "$BUILT/$(distributions | head -1)/hooks/$script" 2>/dev/null | head -1)"
   [ -n "$plain" ] || continue

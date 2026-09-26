@@ -33,7 +33,8 @@ assert "and it answers to that name" "$?" \
 assert "and nothing is written under a bare name" "$?" \
   "a second plugin built with this SDK writes the same name"
 
-# Every hook the build registered for this harness, each one once. The install
+# Every hook the build registered for this harness, as many times as the build
+# registered it: a hook asking for several tool kinds is one group each. The install
 # writes the folder it is run from, which is not the folder the build named, so
 # what is compared is the part below that folder.
 registered() {
@@ -48,8 +49,9 @@ while read -r command; do
   inside="${command#* }"
   label="$inside is registered for $event"
   counted_as="$(held "$event" "$CLOUD/$inside")"
-  [ "$counted_as" = "1" ]
-  assert "$label" "$?" "it is registered $counted_as times, not once"
+  wanted="$(registered | grep --count --line-regexp --fixed-strings "$command")"
+  [ "$counted_as" = "$wanted" ]
+  assert "$label" "$?" "it is registered $counted_as times, not $wanted"
 done < <(registered)
 
 printf "\nTest group: installing over a settings file keeps what it holds\n"
