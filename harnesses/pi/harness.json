@@ -9,5 +9,6 @@
 	],
 	"serves": [
 		"pi"
-	]
+	],
+	"tools": "claude"
 }

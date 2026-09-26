@@ -19,6 +19,17 @@ PREFIX="$(printf '%s' "$NAME" | tr '[:lower:]-' '[:upper:]_')"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
+# The hooks the manifest declares, read the way the build reads them: each
+# event under the name a registration carries, holding script names. A plugin
+# names events by their common names and can name hooks as objects with an
+# `on` list; this is the one shape every test reads.
+DECLARED="$WORK/declared.json"
+jq --slurpfile events "$SDK/builder/events.json" '
+  .hooks = ((.hooks // {}) | with_entries(
+    .key |= $events[0].events[.]
+    | .value |= map(if type == "object" then .script else . end)))
+' "$MANIFEST" > "$DECLARED"
+
 # One build serves every test in a run: run-tests makes it once and puts its
 # directory in AI_PLUGIN_SDK_TEST_BUILD, so the tests read one set of folders
 # rather than each making its own. A test run on its own is given no such

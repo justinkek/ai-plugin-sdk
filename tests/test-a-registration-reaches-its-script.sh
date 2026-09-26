@@ -92,7 +92,7 @@ for distribution in $(distributions); do
     grep --quiet --fixed-strings "\"$script\"" "$BUILT/$distribution/src/index.ts"
     assert "the $distribution extension is handed $script" "$?" \
       "the manifest registers it and the extension never spawns it"
-  done < <(jq --raw-output '.hooks[][]' "$MANIFEST")
+  done < <(jq --raw-output '.hooks[][]' "$DECLARED")
 done
 
 counted

@@ -20,7 +20,7 @@ commands | head -1 | grep --quiet --fixed-strings 'refresh.sh'
 assert "the refresh runs first at session start" "$?" \
   "whatever the snapshot held is what the session reads"
 
-if jq --exit-status '(.hooks.SessionStart // []) | length > 0' "$MANIFEST" >/dev/null; then
+if jq --exit-status '(.hooks.SessionStart // []) | length > 0' "$DECLARED" >/dev/null; then
   [ "$(commands | grep --count .)" -gt 1 ]
   assert "and the plugin's own hooks run after it" "$?" "a session would be handed nothing"
 fi
