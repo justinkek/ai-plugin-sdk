@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# Whether a plugin's pull request raises its version when it has to. Every
+# merge to a plugin's main is a release: an install names no ref, so what main
+# points at is what a person gets, and an install caches by version. A change
+# an install receives with no new version reaches nobody who has the old one.
+# A change nothing installs - the README, the tests, CI - needs no new version.
+#
+#   ai-plugin-sdk/version-changed <plugin-directory> [base-ref]
+#
+# Run by a plugin's CI on a pull request, with the base branch fetched. It is
+# not part of tests/run-tests, because a branch is allowed to be mid-change;
+# it is the merge that has to carry the bump.
+
+set -e
+
+plugin="$(cd "${1:-$PWD}" && pwd)"
+base="${2:-origin/main}"
+
+version_in() { git -C "$plugin" show "$1:plugin.json" 2>/dev/null | jq --raw-output '.version // empty'; }
+
+was="$(version_in "$base")"
+now="$(jq --raw-output '.version' "$plugin/plugin.json")"
+
+# The version the update check reads is package.json's, and the build reads
+# plugin.json's. Two numbers tell a session two different things.
+if [ -f "$plugin/package.json" ]; then
+  stated="$(jq --raw-output '.version // empty' "$plugin/package.json")"
+  if [ -n "$stated" ] && [ "$stated" != "$now" ]; then
+    printf 'plugin.json says %s and package.json says %s.\n\n' "$now" "$stated" >&2
+    printf 'The build reads one and the update check reads the other. Make them agree.\n' >&2
+    exit 1
+  fi
+fi
+
+if [ -z "$was" ]; then
+  printf 'no plugin.json on %s to compare against, so nothing to check\n' "$base"
+  exit 0
+fi
+
+# What an install receives: the folders the build writes, the manifests a
+# marketplace reads, and the files holding the version.
+ships() {
+  printf '%s\n' distributions .claude-plugin .agents plugin.json package.json
+}
+
+changed_files() {
+  git -C "$plugin" diff --name-only "$base...HEAD" 2>/dev/null \
+    || git -C "$plugin" diff --name-only "$base" HEAD
+}
+
+touches_what_ships() {
+  local path shipped
+  while read -r path; do
+    [ -n "$path" ] || continue
+    while read -r shipped; do
+      case "$path" in "$shipped" | "$shipped"/*) return 0 ;; esac
+    done < <(ships)
+  done < <(changed_files)
+  return 1
+}
+
+# A bump that goes backwards, or sideways into a typo, names a version somebody
+# already has.
+newest() { printf '%s\n%s\n' "$1" "$2" | sort --version-sort | tail -1; }
+
+if [ "$was" != "$now" ] && [ "$(newest "$was" "$now")" != "$now" ]; then
+  printf 'the version went from %s back to %s.\n\n' "$was" "$now" >&2
+  printf 'An install caches by version, so a number somebody already has is a\n' >&2
+  printf 'number that reaches nobody. Raise it instead.\n' >&2
+  exit 1
+fi
+
+if [ "$was" = "$now" ] && ! touches_what_ships; then
+  printf 'the version is still %s, and nothing an install receives has changed.\n' "$now"
+  exit 0
+fi
+
+if [ "$was" = "$now" ]; then
+  printf 'the version is still %s, and this changes what an install receives.\n\n' "$now" >&2
+  printf 'An install names no ref, so what main points at is what a person gets, and\n' >&2
+  printf 'an install caches by version. Raise the version in plugin.json and\n' >&2
+  printf 'package.json, then run the build.\n\n' >&2
+  printf 'Minor when something a person relies on stops working the way it did;\n' >&2
+  printf 'patch when it does not.\n' >&2
+  exit 1
+fi
+
+printf 'version %s -> %s\n' "$was" "$now"
