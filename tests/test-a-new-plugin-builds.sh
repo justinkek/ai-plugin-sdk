@@ -17,6 +17,11 @@ for wanted in plugin.json hooks/say-the-rule.sh rules/reply-shape.md; do
   assert "it writes $wanted" "$?" "the build would have nothing to read"
 done
 
+for generated in 'distributions/**' INSTALL.md COMPATIBILITY.md; do
+  grep --quiet --line-regexp --fixed-strings "$generated linguist-generated=true" "$made/first-plugin/.gitattributes"
+  assert "it marks $generated as generated" "$?" "a pull request shows every built file as a change to review"
+done
+
 jq --exit-status . "$made/first-plugin/plugin.json" >/dev/null
 assert "the manifest is readable JSON" "$?" "the build stops on the first line"
 

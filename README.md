@@ -200,7 +200,15 @@ It reads `your-plugin/plugin.json` and writes:
   a session there
 
 3. Commit all three. An install fetches files from your repository, so what is
-   committed is what a person gets.
+   committed is what a person gets. `new-plugin` writes a `.gitattributes`
+   marking them `linguist-generated`, so GitHub folds their diff in a pull
+   request; a plugin started by hand can copy it:
+
+   ```
+   distributions/** linguist-generated=true
+   INSTALL.md linguist-generated=true
+   COMPATIBILITY.md linguist-generated=true
+   ```
 
 ## Plugins built with `ai-plugin-sdk`
 

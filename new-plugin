@@ -76,6 +76,14 @@ sed "s/{ceiling}/$(setting_value LINE_CEILING)/" "$PLUGIN_ROOT/rules/reply-shape
 HOOK
 chmod +x "$where/hooks/say-the-rule.sh"
 
+# What the build writes, marked so GitHub folds its diff in a pull request and
+# a reviewer reads the sources instead.
+cat > "$where/.gitattributes" <<'ATTRIBUTES'
+distributions/** linguist-generated=true
+INSTALL.md linguist-generated=true
+COMPATIBILITY.md linguist-generated=true
+ATTRIBUTES
+
 printf '%s is ready. Build it:\n\n' "$name"
 printf '    %s/build %s\n\n' "$sdk" "$where"
 printf 'Then commit distributions/, INSTALL.md and COMPATIBILITY.md: an install\n'
