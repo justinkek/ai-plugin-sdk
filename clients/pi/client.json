@@ -23,8 +23,7 @@
 			"move": "bash",
 			"notebook_edit": "edit"
 		},
-		"skills": false,
+		"skills": true,
 		"settings": "install"
-	},
-	"note": "Skills load from ~/.agents/skills and an extension puts none there, so a plugin's skills do not arrive."
+	}
 }

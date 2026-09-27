@@ -44,10 +44,12 @@ assert "every product row reached the page" "$?" \
 
 printf "\nTest group: Partial is said where something does not reach a session\n"
 
-# Pi runs no skills, so a plugin's skills do not arrive there.
-grep --quiet --extended-regexp '^\| Pi \|.*\| Partial \|' "$PAGE"
-assert "Pi reads Partial, because it carries no skills" "$?" \
-  "$(grep '^| Pi |' "$PAGE")"
+# Claude Chat runs no hooks, so a plugin with hooks is only partly there.
+if [ "$(jq '[.hooks[]?[]] | length' "$DECLARED")" -gt 0 ]; then
+  grep --quiet --extended-regexp '^\| Claude Chat \| Web GUI \|.*\| Partial \|' "$PAGE"
+  assert "Claude Chat reads Partial, because it runs no hooks" "$?" \
+    "$(grep '^| Claude Chat | Web GUI' "$PAGE")"
+fi
 
 grep --quiet --extended-regexp '^\| Claude Code \| CLI \| Local \|.*\| Supported \|' "$PAGE"
 assert "Claude Code on your machine reads Supported" "$?" \
