@@ -1,0 +1,3 @@
+# Written by compatibility-page from compatibility.json and clients/. GitHub
+# folds its diff and leaves it out of the language count.
+COMPATIBILITY.md linguist-generated=true
