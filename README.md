@@ -170,6 +170,17 @@ the hooks, and `strongest_permission` in `lib/permission.sh` is the merge.
 | Codex                        | `codex`             |
 | Pi                           | `pi`                |
 
+Pi installs a plugin from its repository and loads only what the plugin's own
+`package.json` names under `pi`. The build cannot write that file, so name both
+parts it writes for Pi:
+
+```json
+"pi": {
+  "extensions": ["./distributions/pi/src/index.ts"],
+  "skills": ["./distributions/pi/skills"]
+}
+```
+
 A page any of them ships is the SDK's. Put a file of the same name under your
 plugin's `clients/<client>/` and yours is used instead.
 

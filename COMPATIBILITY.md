@@ -49,12 +49,11 @@ under the tables says which.
 
 | Product | Surface | Where it runs | Support |
 | --- | --- | --- | --- |
-| Pi | CLI | Local | Partial |
+| Pi | CLI | Local | Supported |
 
 **What is missing where it says Partial**
 
 - **Claude Chat** - No hook runs, so a plugin reaches a conversation only through its skills.
-- **Pi** - Skills load from ~/.agents/skills and an extension puts none there, so a plugin's skills do not arrive.
 
 ## Note
 
