@@ -22,6 +22,50 @@ client_runs() {
 
 plugin_has_hooks() { [ "$(jq '[.hooks[]?[]] | length' "$manifest")" -gt 0 ]; }
 
+# What this plugin's hooks need a client to run: each event it names, by its
+# common name, and each tool kind a tool event's `on` list asks for. A kind
+# asked for with no pattern is also listed as whole: the hook sees every call.
+plugin_needs() {
+  jq --raw-output --slurpfile events "$sdk/builder/events.json" '
+    ($events[0].tool_events) as $tool_events
+    | (.hooks // {}) | to_entries[] | select((.value | length) > 0)
+    | "event \(.key)",
+      (select(.key as $key | $tool_events | index($key))
+        | .value[] | select(type == "object") | .on[]?
+        | "kind \(sub("\\(.*$"; ""))", (select(test("\\(") | not) | "whole \(.)"))
+  ' "$source_manifest" | sort --unique
+}
+
+# What this plugin needs that a client that runs hooks does not have, one to a
+# line: an event it never fires, or a tool kind its hooks are never shown. A
+# client can do one kind through another - Claude makes several replacements
+# through its single Edit - and a plugin that asks for that other kind too, with
+# no pattern, sees it there, so nothing is missed.
+client_lacks() {
+  local client="$1" needs need kind through
+  [ "$(client_runs "$client" .runs.hooks)" = "true" ] || return 0
+  needs="$(plugin_needs)"
+  while read -r need; do
+    case "$need" in
+      '' | "whole "*) continue ;;
+      "event "*)
+        jq --exit-status --arg e "${need#event }" '.runs.events // [] | index($e)' \
+          "$sdk/clients/$client/client.json" >/dev/null || printf '%s\n' "$need"
+        ;;
+      "kind "*)
+        kind="${need#kind }"
+        jq --exit-status --arg k "$kind" '.runs.tool_kinds // [] | index($k)' \
+          "$sdk/clients/$client/client.json" >/dev/null && continue
+        through="$(client_runs "$client" ".runs.done_through[\"$kind\"]")"
+        if [ -n "$through" ] && printf '%s\n' "$needs" | grep --quiet --line-regexp --fixed-strings "whole $through"; then
+          continue
+        fi
+        printf '%s\n' "$need${through:+ (done through $through here)}"
+        ;;
+    esac
+  done <<< "$needs"
+}
+
 # Whether a client runs everything the SDK can give it. Nothing here asks about
 # a plugin, so the SDK's own page and a plugin's page read the same rule.
 client_supports_everything() {
@@ -37,6 +81,8 @@ client_supports_everything() {
 supported_on() {
   local client="$1"
   if [ "$(client_runs "$client" .runs.hooks)" != "true" ] && plugin_has_hooks; then
+    printf 'Partial'
+  elif [ -n "$(client_lacks "$client")" ]; then
     printf 'Partial'
   elif [ "$(client_runs "$client" .runs.skills)" != "true" ]; then
     printf 'Partial'
@@ -90,13 +136,15 @@ compatibility_rows() {
 
 # The caveats, one per client this plugin is built for that carries one.
 compatibility_notes() {
-  local harness client note shown=""
+  local harness client note lacks shown=""
   for harness in $(harnesses); do
     builds_for "$harness" || continue
     for client in $(served "$harness"); do
-      note="$(client_runs "$client" .note)"
-      [ -n "$note" ] || continue
       case " $shown " in *" $client "*) continue ;; esac
+      note="$(client_runs "$client" .note)"
+      lacks="$(client_lacks "$client" | sed -e 's/^event //' -e 's/^kind //' | paste -sd ',' - | sed 's/,/, /g')"
+      [ -n "$lacks" ] && note="${note:+$note }This plugin's hooks for $lacks never run here."
+      [ -n "$note" ] || continue
       shown="$shown $client"
       printf '%s\n' "- **$(named_client "$client")** - $note"
     done

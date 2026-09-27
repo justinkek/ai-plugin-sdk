@@ -2,6 +2,39 @@
 	"name": "Claude Code, on your machine",
 	"runs": {
 		"hooks": true,
+		"events": [
+			"session_start",
+			"prompt",
+			"before_tool",
+			"after_tool",
+			"permission_request",
+			"stop",
+			"compact",
+			"after_compact",
+			"session_end",
+			"subagent_start",
+			"subagent_stop"
+		],
+		"tool_kinds": [
+			"bash",
+			"powershell",
+			"read",
+			"write",
+			"edit",
+			"notebook_edit",
+			"grep",
+			"glob",
+			"web_fetch",
+			"web_search",
+			"agent",
+			"mcp"
+		],
+		"done_through": {
+			"multi_edit": "edit",
+			"delete": "bash",
+			"move": "bash",
+			"list": "glob"
+		},
 		"skills": true,
 		"settings": "install"
 	}
