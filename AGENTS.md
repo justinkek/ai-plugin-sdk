@@ -75,6 +75,7 @@ silencing a warning is a decision, so it is written down.
 | the shell a hook needs | `lib/shell.sh` |
 | the paths every setting reads | `lib/settings/paths.sh`, the one file there that is not a function |
 | which parts get copied where | `builder/contents.sh` |
+| when a plugin has to raise its version | `version-changed`, which a plugin's CI runs; `tests/version-changed` is the SDK's own |
 | how a page or a README is written | `builder/pages.sh` |
 | how a skill is rendered | `builder/skills.sh` |
 | what the manifest is read into | `builder/manifest.sh` |

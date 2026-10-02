@@ -76,6 +76,39 @@ sed "s/{ceiling}/$(setting_value LINE_CEILING)/" "$PLUGIN_ROOT/rules/reply-shape
 HOOK
 chmod +x "$where/hooks/say-the-rule.sh"
 
+# CI runs the SDK's tests against the plugin, and on a pull request asks for a
+# new version when the change reaches an install.
+mkdir -p "$where/.github/workflows"
+cat > "$where/.github/workflows/tests.yml" <<'WORKFLOW'
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the SDK
+        run: git clone --depth 1 https://github.com/justinkek/ai-plugin-sdk ../ai-plugin-sdk
+
+      - name: Install shellcheck and jq
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck jq
+
+      - name: The SDK's tests, against this plugin
+        run: ../ai-plugin-sdk/tests/run-tests "$PWD"
+
+      - name: The version moved, where an install receives the change
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --depth=1 origin "$GITHUB_BASE_REF"
+          ../ai-plugin-sdk/version-changed "$PWD" "origin/$GITHUB_BASE_REF"
+WORKFLOW
+
 # What the build writes, marked so GitHub folds its diff in a pull request and
 # a reviewer reads the sources instead.
 cat > "$where/.gitattributes" <<'ATTRIBUTES'

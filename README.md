@@ -210,6 +210,17 @@ It reads `your-plugin/plugin.json` and writes:
    COMPATIBILITY.md linguist-generated=true
    ```
 
+4. On every pull request, check the version moved where it has to:
+
+   ```
+   ai-plugin-sdk/version-changed your-plugin origin/main
+   ```
+
+   It asks for a new version when the change reaches `distributions/`, the
+   marketplace manifests, `plugin.json` or `package.json`, and for none when it
+   touches only the README, the tests or CI. `new-plugin` writes a CI workflow
+   that runs it, and the SDK's tests, on every pull request.
+
 ## Plugins built with `ai-plugin-sdk`
 
 - [unsolicited-text](https://github.com/justinkek/unsolicited-text)
