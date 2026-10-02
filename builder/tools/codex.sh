@@ -32,10 +32,10 @@ tool_entries_read() {
         | (.done + (.open | finished))[]
         | (if .kind == "edit" and .hunks > 1 then .kind = "multi_edit" else . end)
         | blank + del(.hunks) + {tool: $tool, added: (.added | join("\n")), removed: (.removed | join("\n"))}
-      elif ($tool // "" | test("^web\\.?run$")) then
+      elif ($tool // "" | . == "webrun") then
         if $input.open then blank + {kind: "web_fetch", tool: $tool, url: ($input.open | tostring)}
         else blank + {kind: "web_search", tool: $tool, query: ($input.search // $input.query // "" | tostring)} end
-      elif ($tool // "" | test("spawn_agent$")) then blank + {kind: "agent", tool: $tool, prompt: ($input.message // "")}
+      elif ($tool // "" | . == "collaborationspawn_agent") then blank + {kind: "agent", tool: $tool, prompt: ($input.message // "")}
       elif ($tool // "" | startswith("mcp__")) then blank + {kind: "mcp", tool: $tool, input: $input}
       else blank + {kind: "other", tool: $tool, input: $input} end
   ' <<< "$1" 2>/dev/null

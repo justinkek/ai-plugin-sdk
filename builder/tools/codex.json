@@ -14,9 +14,9 @@
 		"grep": { "tools": ["Bash"] },
 		"glob": { "tools": ["Bash"] },
 		"list": { "tools": ["Bash"] },
-		"web_fetch": { "tools": ["web\\.?run"] },
-		"web_search": { "tools": ["web\\.?run"] },
-		"agent": { "tools": ["collaboration\\.?spawn_agent"] },
+		"web_fetch": { "tools": ["webrun"] },
+		"web_search": { "tools": ["webrun"] },
+		"agent": { "tools": ["collaborationspawn_agent"] },
 		"mcp": { "tools": ["mcp__.*"] }
 	}
 }
