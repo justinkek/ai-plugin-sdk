@@ -26,6 +26,7 @@
 			"web_fetch",
 			"web_search",
 			"agent",
+			"agent_report",
 			"mcp"
 		],
 		"done_through": {

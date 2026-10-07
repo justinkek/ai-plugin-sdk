@@ -15,6 +15,7 @@ cat > "$fixture/plugin.json" <<'JSON'
 	"hooks": {
 		"session_start": [ { "script": "hello.sh", "on": ["startup", "resume"] } ],
 		"before_tool": [ { "script": "guard.sh", "on": ["bash(git *)", "write(*.sh)", "edit"] } ],
+		"after_tool": [ { "script": "report.sh", "on": ["agent_report"] } ],
 		"stop": ["note.sh"]
 	}
 }
@@ -23,6 +24,7 @@ printf '#!/usr/bin/env bash\ncat >/dev/null\n' > "$fixture/hooks/hello.sh"
 printf '#!/usr/bin/env bash\ncat >/dev/null\n' > "$fixture/hooks/note.sh"
 printf '#!/usr/bin/env bash\npayload="$(cat)"\n. "$(dirname "$0")/lib/tool.sh"\ntool_entries "$payload"\n' \
   > "$fixture/hooks/guard.sh"
+cp "$fixture/hooks/guard.sh" "$fixture/hooks/report.sh"
 built="$WORK/fixture-built"
 "$SDK/build" "$fixture" "$built" "$WORK/fixture-install.md" >/dev/null
 
@@ -62,6 +64,14 @@ assert "a shell file written on Claude is a write entry" "$?" "it was not"
 
 [ -z "$(entries claude '{"tool_name":"Write","tool_input":{"file_path":"index.ts","content":"x"}}')" ]
 assert "a file the pattern does not name is not" "$?" "it was handed over"
+
+report="$(printf '%s' '{"tool_name":"SubagentHandback","tool_input":{"message":"done"}}' \
+  | bash "$built/claude/hooks/report.sh" | jq --raw-output '"\(.kind) \(.prompt)"')"
+[ "$report" = "agent_report done" ]
+assert "a subagent handing its report back is an agent_report entry, carrying the report" "$?" "it read '$report'"
+
+groups "$claude" PostToolUse | grep --quiet --fixed-strings '{"matcher":"SubagentHandback","if":[]}'
+assert "and Claude registers it under SubagentHandback" "$?" "$(groups "$claude" PostToolUse)"
 
 patch=$'*** Begin Patch\n*** Add File: new.sh\n+enc=1\n*** Update File: run.txt\n@@\n-value=1\n+value=2\n*** Add File: notes.md\n+hi\n*** Delete File: old.sh\n*** End Patch'
 payload="$(jq --null-input --compact-output --arg patch "$patch" '{tool_name:"apply_patch",tool_input:{command:$patch}}')"
