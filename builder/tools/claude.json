@@ -17,6 +17,7 @@
 		"web_fetch": { "tools": ["WebFetch"], "if": "WebFetch" },
 		"web_search": { "tools": ["WebSearch"], "if": "WebSearch" },
 		"agent": { "tools": ["Agent"] },
+		"agent_report": { "tools": ["SubagentHandback"] },
 		"mcp": { "tools": ["mcp__.*"] }
 	}
 }
