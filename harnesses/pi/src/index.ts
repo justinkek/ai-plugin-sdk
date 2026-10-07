@@ -53,18 +53,15 @@ const toolNames: Record<string, string> = {
 	ls: "LS",
 };
 
-// Every hook registered on the tool call answers, and the answers are merged by
-// the same library the hooks speak through: deny outranks ask, ask outranks allow.
-function decided(event: any, ctx: any): { decision: string; reason: string } | undefined {
-	const scripts = registered.PreToolUse ?? [];
-	if (scripts.length === 0) return undefined;
+// A Pi tool call as the payload every other client sends a tool hook.
+function toolPayload(hookEvent: string, event: any, ctx: any): Record<string, unknown> {
 	const input = event?.input ?? {};
 	// Pi's edit carries a list of replacements. One is an Edit, as every other
 	// client sends it; several are a MultiEdit.
 	const edits: any[] = Array.isArray(input.edits) ? input.edits : [];
 	const several = event?.toolName === "edit" && edits.length > 1;
-	const payload = {
-		hook_event_name: "PreToolUse",
+	return {
+		hook_event_name: hookEvent,
 		cwd: ctx?.cwd ?? process.cwd(),
 		tool_name: several ? "MultiEdit" : (toolNames[event?.toolName] ?? event?.toolName),
 		tool_input: {
@@ -75,6 +72,14 @@ function decided(event: any, ctx: any): { decision: string; reason: string } | u
 			edits: edits.map((edit) => ({ old_string: edit.oldText, new_string: edit.newText })),
 		},
 	};
+}
+
+// Every hook registered on the tool call answers, and the answers are merged by
+// the same library the hooks speak through: deny outranks ask, ask outranks allow.
+function decided(event: any, ctx: any): { decision: string; reason: string } | undefined {
+	const scripts = registered.PreToolUse ?? [];
+	if (scripts.length === 0) return undefined;
+	const payload = toolPayload("PreToolUse", event, ctx);
 	const answers = scripts.map((script) => spawnHook(script, payload)).join("\n");
 	let strongest = "";
 	try {
@@ -119,6 +124,16 @@ export default function (pi: ExtensionAPI) {
 			if (await ctx.ui.confirm("{{display}}", answer.reason)) return undefined;
 		}
 		return { block: true, reason: answer.reason };
+	});
+
+	pi.on("tool_result", async (event: any, ctx: any) => {
+		// What a hook says after a tool call is added to the result the agent reads.
+		const scripts = registered.PostToolUse ?? [];
+		if (scripts.length === 0) return undefined;
+		const payload = { ...toolPayload("PostToolUse", event, ctx), tool_response: textOf(event) };
+		const notes = scripts.map((script) => said(spawnHook(script, payload))).filter(Boolean);
+		if (notes.length === 0) return undefined;
+		return { content: [...(event?.content ?? []), { type: "text", text: notes.join("\n") }] };
 	});
 
 	pi.on("turn_end", async (event: any) => {
