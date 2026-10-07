@@ -6,6 +6,7 @@
 			"session_start",
 			"prompt",
 			"before_tool",
+			"after_tool",
 			"stop"
 		],
 		"tool_kinds": [
