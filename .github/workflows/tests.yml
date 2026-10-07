@@ -40,9 +40,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install --yes jq
-
       - name: Build the example plugin
         run: ./build example
 
