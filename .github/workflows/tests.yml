@@ -17,9 +17,6 @@ jobs:
       # tests/run-tests on their own machine should not have to install
       # anything to see most of it pass. Here they are installed, so the
       # shellcheck test stops skipping and both payload readers are exercised.
-      - name: Install shellcheck and jq
-        run: sudo apt-get update && sudo apt-get install --yes shellcheck jq
-
       - name: Tests, against the example plugin
         run: tests/run-tests
 
