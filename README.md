@@ -94,6 +94,7 @@ names the event's own values, such as `startup` and `resume`.
 | `grep`, `glob`, `list` | the search pattern |
 | `web_fetch`, `web_search` | the URL, or the query |
 | `agent` | the prompt |
+| `agent_report` | the report a subagent hands back |
 | `mcp` | the tool's name |
 
 Each client's tool names for each kind are in `builder/tools/`. Where a client

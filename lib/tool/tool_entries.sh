@@ -18,7 +18,7 @@ tool_entries() {
       elif .kind == "grep" or .kind == "glob" then .pattern
       elif .kind == "web_fetch" then .url
       elif .kind == "web_search" then .query
-      elif .kind == "agent" then .prompt
+      elif .kind == "agent" or .kind == "agent_report" then .prompt
       elif .kind == "mcp" or .kind == "other" then .tool
       else .file end' <<< "$entry")"
     tool_wanted "$kind" "$subject" && printf '%s\n' "$entry"

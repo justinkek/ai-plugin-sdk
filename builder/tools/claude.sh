@@ -21,6 +21,7 @@ tool_entries_read() {
       elif $tool == "WebFetch" then {kind: "web_fetch", url: $input.url}
       elif $tool == "WebSearch" then {kind: "web_search", query: $input.query}
       elif $tool == "Agent" or $tool == "Task" then {kind: "agent", prompt: $input.prompt}
+      elif $tool == "SubagentHandback" then {kind: "agent_report", prompt: $input.message}
       elif ($tool // "" | startswith("mcp__")) then {kind: "mcp", input: $input}
       else {kind: "other", input: $input} end
     | {kind, tool: $tool, file: "", command: "", added: "", removed: "", pattern: "", url: "", query: "", prompt: ""}
