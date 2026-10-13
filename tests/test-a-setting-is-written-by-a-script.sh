@@ -47,8 +47,9 @@ done < <(declared)
 printf "\nTest group: what it refuses, it does not write\n"
 
 # A text setting takes any value, so it has nothing to refuse. Ask one that can.
+# A list is written an item at a time, which has a group of its own below.
 first="$(declared | while read -r key; do
-  [ "$(kind_of "$key")" = "text" ] || { printf '%s' "$key"; break; }
+  case "$(kind_of "$key")" in text | list) ;; *) printf '%s' "$key"; break ;; esac
 done)"
 [ -n "$first" ] || first="$(declared | head -1)"
 kind="$(kind_of "$first")"
