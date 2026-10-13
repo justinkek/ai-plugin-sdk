@@ -26,8 +26,10 @@ plugin_manifest_sh() {
   printf "PLUGIN_PREFIX='%s'\n" "$prefix"
   printf "PLUGIN_DISPLAY_NAME='%s'\n\n" "$display"
 
+  # A list's default is its items, one to a line, so a hook reads the shipped
+  # list without jq.
   case_function plugin_setting_default \
-    'to_entries[] | "    \(.key)) printf %s \(.value.default // "" | @sh) ;;"'
+    'to_entries[] | "    \(.key)) printf %s \(.value.default | if type == "array" then join("\n") else (. // "") end | @sh) ;;"'
   printf '\n'
   case_function plugin_setting_kind \
     'to_entries[] | "    \(.key)) printf %s \(.value.kind // "text" | @sh) ;;"'

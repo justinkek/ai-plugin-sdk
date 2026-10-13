@@ -18,7 +18,7 @@ PLUGIN_ROOT="${PLUGIN_LIB%/*/*}"
 
 plugin_named_home="${PLUGIN_PREFIX}_HOME"
 PLUGIN_HOME="${!plugin_named_home:-$HOME/.$PLUGIN_NAME}"
-PLUGIN_SETTINGS="$PLUGIN_HOME/settings"
+PLUGIN_SETTINGS="$PLUGIN_HOME/settings.json"
 PLUGIN_STATE="$PLUGIN_HOME/state"
 
 # The project a session works in, which can hold settings of its own. A hook

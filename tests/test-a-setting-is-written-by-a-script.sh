@@ -65,14 +65,14 @@ writes 'NOT_A_KEY_THIS_PLUGIN_HAS' something >/dev/null 2>&1
 [ "$?" != "0" ]
 assert "a key this plugin does not have is refused" "$?" "it wrote a key nothing reads"
 
-grep --quiet --fixed-strings 'NOT_A_KEY_THIS_PLUGIN_HAS' "$HOME_DIR/settings"
+grep --quiet --fixed-strings 'NOT_A_KEY_THIS_PLUGIN_HAS' "$HOME_DIR/settings.json"
 [ "$?" = "1" ]
 assert "and nothing about it is in the file" "$?" "the file holds a key no hook reads"
 
 printf "\nTest group: the rest of the file is left as it was\n"
 
-printf '# a person wrote this\n\n%s_%s = %s\n# and this\n' \
-  "$PREFIX" "$first" "$(reads "$first")" > "$HOME_DIR/settings"
+jq --null-input --arg first "$first" --arg held "$(reads "$first")" \
+  '{"A_PERSON_WROTE_THIS": "before", ($first): $held, "AND_THIS": "after"}' > "$HOME_DIR/settings.json"
 
 case "$kind" in
   count) other=9 ;;
@@ -82,14 +82,34 @@ case "$kind" in
 esac
 
 writes "$first" "$other" >/dev/null
-[ "$(grep --count . "$HOME_DIR/settings")" = "3" ]
-assert "the comments are still there" "$?" \
-  "it wrote $(grep --count . "$HOME_DIR/settings") lines where three were expected"
+order="$(jq --raw-output 'keys_unsorted | join(" ")' "$HOME_DIR/settings.json")"
+[ "$order" = "A_PERSON_WROTE_THIS $first AND_THIS" ]
+assert "the other keys are still there, in their order" "$?" "it holds '$order'"
 
-# The old assignment was the third line of the fixture above.
-[ "$(sed -n '3p' "$HOME_DIR/settings")" = "${PREFIX}_$first = $other" ]
+[ "$(jq --raw-output --arg k "$first" '.[$k]' "$HOME_DIR/settings.json")" = "$other" ]
 assert "and the new value sits where the old one sat" "$?" \
-  "it reads '$(sed -n '3p' "$HOME_DIR/settings")'"
+  "it reads '$(jq --compact-output . "$HOME_DIR/settings.json")'"
+
+printf 'not json\n' > "$HOME_DIR/settings.json"
+writes "$first" "$other" >/dev/null 2>&1
+[ "$?" != "0" ] && [ "$(cat "$HOME_DIR/settings.json")" = "not json" ]
+assert "a file that is not JSON is refused and left as it was" "$?" "it was written over"
+rm "$HOME_DIR/settings.json"
+
+printf "\nTest group: a list is written an item at a time\n"
+
+list="$(offered | jq --raw-output 'to_entries[] | select(.value.kind == "list") | .key' | head -1)"
+if [ -n "$list" ]; then
+  shipped="$(offered | jq --raw-output --arg k "$list" '.[$k].default[0]')"
+  env "${PREFIX}_HOME=$HOME_DIR" bash "$WRITER" "$list" "$shipped" off >/dev/null
+  env "${PREFIX}_HOME=$HOME_DIR" bash "$WRITER" "$list" an-added-item on >/dev/null
+  [ "$(jq --compact-output --arg k "$list" '.[$k]' "$HOME_DIR/settings.json")" = "{\"$shipped\":false,\"an-added-item\":true}" ]
+  assert "$list holds each item as on or off" "$?" "it holds $(jq --compact-output . "$HOME_DIR/settings.json")"
+
+  env "${PREFIX}_HOME=$HOME_DIR" bash "$WRITER" "$list" an-added-item maybe >/dev/null 2>&1
+  [ "$?" != "0" ]
+  assert "and refuses anything but on or off" "$?" "it wrote 'maybe'"
+fi
 
 printf "\nTest group: the skill says to run it, where there is a path to run\n"
 

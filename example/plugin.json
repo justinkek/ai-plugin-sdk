@@ -54,6 +54,15 @@
 				"because": "prints no opening line",
 				"so": "greets nobody"
 			}
+		},
+		"PLAIN_WORDS": {
+			"kind": "list",
+			"default": [
+				"utilise",
+				"leverage",
+				"facilitate"
+			],
+			"says": "words the rule asks to be put plainly"
 		}
 	}
 }
