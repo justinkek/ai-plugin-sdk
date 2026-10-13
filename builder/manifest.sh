@@ -157,6 +157,16 @@ settings_json() {
   if [ -z "$repository" ]; then
     held="$(printf '%s' "$held" | jq 'del(.UPDATE_CHECK, .UPDATE_CHECK_DAYS, .VERSION_SOURCE)')"
   fi
-  printf '%s' "$held" | jq --slurpfile declared <(jq '.settings // {}' "$manifest") \
-    '. * ($declared[0] // {})'
+  # A list comes with the switch that leaves out what the plugin ships, so a
+  # plugin declares the list alone.
+  printf '%s' "$held" | jq --arg prefix "$prefix" --slurpfile declared <(jq '.settings // {}' "$manifest") '
+    . * ($declared[0] // {})
+    | . + (to_entries | map(select(.value.kind == "list") | {
+        key: (.key + "_SHIPPED"),
+        value: {
+          kind: "switch",
+          default: "on",
+          says: "`off` leaves out the \(.value.default // [] | length) items the plugin ships in `\($prefix)_\(.key)`, so only the ones turned on there are used"
+        }
+      }) | from_entries)'
 }

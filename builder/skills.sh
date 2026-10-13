@@ -70,7 +70,9 @@ settings_table() {
     "| --- | --- | --- |",
     (to_entries[]
       | "| `\($prefix)_\(.key)` | "
-        + (if .value.default != null and .value.default != ""
+        + (if (.value.default | type) == "array"
+           then "`\(.value.default | join(" "))`"
+           elif .value.default != null and .value.default != ""
            then "`\(.value.default)`" else (.value.unset // "unset") end)
         + " | \(.value.says // "") |")
   ' | pathed
@@ -156,9 +158,9 @@ how_to_write_a_setting() {
     printf '%s\n' 'Refuse a value the table above does not allow, saying what it takes and writing'
     printf '%s\n' 'nothing; where the file already holds one, say so, since the hooks read it as'
     printf '%s\n\n' 'the default.'
-    printf '%s\n' 'If the file is not there, create and add the setting.'
+    printf '%s\n' 'If the file is not there, create it as a JSON object holding the setting.'
     printf '%s\n' 'Else, read the file, replace or add the setting, and write it back.'
-    printf '%s\n' 'Leave the rest of the file as it is, comments included.'
+    printf '%s\n' 'Leave every other key in the file as it is.'
     return 0
   fi
 
@@ -167,13 +169,18 @@ how_to_write_a_setting() {
   printf 'bash "%s/set-setting.sh" <key> <value>\n' "$harness_root"
   printf '```\n\n'
   printf '%s\n' 'It creates the file if it is not there, puts the new value where the old one'
-  printf '%s\n' 'was, and leaves the rest of the file as it is, comments included. It writes'
-  printf '%s\n' 'nothing and says what the setting takes when the value is one it cannot take,'
-  printf '%s\n\n' 'so pass on what it says rather than trying again.'
+  printf '%s\n' 'was, and leaves every other key in the file as it is. It writes nothing and'
+  printf '%s\n' 'says what the setting takes when the value is one it cannot take, or when the'
+  printf '%s\n\n' 'file is not JSON, so pass on what it says rather than trying again.'
   printf '%s\n' 'Where the file already holds a value for the key, say so before running it,'
   printf '%s\n\n' 'since the hooks read it as the default.'
+  printf '%s\n' 'For a list setting, name the item and then `on` or `off`, once per item:'
+  printf '```\n'
+  printf 'bash "%s/set-setting.sh" <list key> <item> on|off\n' "$harness_root"
+  printf '```\n\n'
   printf '%s\n' 'For the project'"'"'s own file, put `--project <directory>` before the key,'
-  printf '%s\n' 'naming the root of the project.'
+  printf '%s\n' 'naming the root of the project. For the person'"'"'s own file for that project,'
+  printf '%s\n' 'put `--local <directory>` there instead.'
 }
 
 settings_skill() {

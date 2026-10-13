@@ -5,3 +5,4 @@ The file is written inside the container, which is rebuilt for every session, so
 a setting you want to keep goes in a `{{prefix}}_` environment variable on
 the cloud environment, see
 [the docs](https://code.claude.com/docs/en/cloud-environments#set-environment-variables).
+A list setting's variable holds the same JSON object the file holds for it.

@@ -11,14 +11,14 @@ declared() { jq --raw-output '.settings // {} | keys[]' "$MANIFEST"; }
 # One key, read the way a hook reads it, with the environment given in $2.
 read_back() {
   env -i HOME="$WORK/read" PATH="$PATH" "${PREFIX}_HOME=$WORK/read" ${2:+"$2"} \
-    bash -c ". \"$LIB\" && setting_value $1"
+    bash -c ". \"$LIB\" && setting_value $1" 2>/dev/null
 }
 
 printf "Test group: every declared setting is read at its declared default\n"
 
 while read -r key; do
   [ -n "$key" ] || continue
-  stated="$(jq --raw-output --arg k "$key" '.settings[$k].default // ""' "$MANIFEST")"
+  stated="$(jq --raw-output --arg k "$key" '.settings[$k].default | if type == "array" then join(" ") else (. // "") end' "$MANIFEST")"
   stated="${stated//\{state\}/$WORK/read/state}"
   stated="${stated//\{home\}/$WORK/read}"
   [ "$(read_back "$key")" = "$stated" ]
@@ -30,7 +30,7 @@ printf "\nTest group: a value the setting cannot take is refused, and the defaul
 while read -r key; do
   [ -n "$key" ] || continue
   kind="$(jq --raw-output --arg k "$key" '.settings[$k].kind // "text"' "$MANIFEST")"
-  case "$kind" in text) continue ;; esac
+  case "$kind" in text | list) continue ;; esac
 
   stated="$(read_back "$key")"
   [ "$(read_back "$key" "${PREFIX}_$key=not-a-$kind-at-all")" = "$stated" ]
@@ -47,6 +47,7 @@ while read -r key; do
     count) held=3 ;;
     switch) held=off ;;
     choice) held="$(jq --raw-output --arg k "$key" '.settings[$k].values[-1]' "$MANIFEST")" ;;
+    list) continue ;;
     *) held=something ;;
   esac
 
@@ -54,10 +55,10 @@ while read -r key; do
   assert "$key reads $held from the environment" "$?" "it read '$(read_back "$key" "${PREFIX}_$key=$held")'"
 
   mkdir -p "$WORK/read"
-  printf '# a comment\n\n%s_%s = %s\n' "$PREFIX" "$key" "$held" > "$WORK/read/settings"
+  jq --null-input --arg k "$key" --arg v "$held" '{($k): $v}' > "$WORK/read/settings.json"
   [ "$(read_back "$key")" = "$held" ]
   assert "and reads it from the settings file" "$?" "it read '$(read_back "$key")'"
-  rm -f "$WORK/read/settings"
+  rm -f "$WORK/read/settings.json"
 done < <(declared)
 
 printf "\nTest group: a switch is read whatever the case\n"
@@ -85,6 +86,7 @@ printf "\nTest group: and names no key nothing reads\n"
 readable() {
   declared
   jq --raw-output 'keys[]' "$SDK/lib/settings.json"
+  jq --raw-output '.settings // {} | to_entries[] | select(.value.kind == "list") | .key + "_SHIPPED"' "$MANIFEST"
   printf 'HOME\n'
 }
 
