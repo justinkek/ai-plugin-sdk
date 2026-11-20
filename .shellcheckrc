@@ -1,0 +1,4 @@
+# Every test hands a condition's status straight to assert: `[ ... ]` on one
+# line, `assert "label" "$?" ...` on the next. That $? is the condition's on
+# purpose, which is what SC2319, new in shellcheck 0.11, warns about.
+disable=SC2319
